@@ -1,0 +1,76 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 7/3/2023 10:29:10 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Input_GETTER
+00000000                             3  * Written by : Anthony Pizzigoni
+00000000                             4  * Date       : 6-28-23
+00000000                             5  * Description: Reads the player's input and holds relevant controls and bit offsets for them.
+00000000                             6  *-----------------------------------------------------------
+00000000  =0000005A                  7  KEYCODE_FIRE        EQU     'Z'
+00000000  =00000058                  8  KEYCODE_SECONDARY   EQU     'X'
+00000000  =0000000D                  9  KEYCODE_PAUSE       EQU     $0D
+00000000  =00000010                 10  KEYCODE_FOCUS       EQU     $10
+00000000                            11  
+00000000  =00000025                 12  KEYCODE_LEFT        EQU     $25
+00000000  =00000027                 13  KEYCODE_RIGHT       EQU     $27
+00000000  =00000026                 14  KEYCODE_UP          EQU     $26
+00000000  =00000028                 15  KEYCODE_DOWN        EQU     $28
+00000000                            16  
+00000000  =00000013                 17  TRAP_CODE_INPUT     EQU     19
+00000000                            18  
+00000000  =00000018                 19  BIT_OFFSET_SHOOT    EQU     24
+00000000  =00000010                 20  BIT_OFFSET_SECONDARY   EQU  16
+00000000  =00000008                 21  BIT_OFFSET_PAUSE    EQU     8
+00000000  =00000000                 22  BIT_OFFSET_FOCUS    EQU     0
+00000000                            23  
+00000000  =00000018                 24  BIT_OFFSET_LEFT     EQU     24
+00000000  =00000010                 25  BIT_OFFSET_RIGHT    EQU     16
+00000000  =00000008                 26  BIT_OFFSET_UP       EQU     8
+00000000  =00000000                 27  BIT_OFFSET_DOWN     EQU     0
+00000000                            28  
+00000000                            29  
+00000000                            30      
+00000000                            31      READ_INPUT:  
+00000000  303C 0013                 32          move.w  #19, d0
+00000004                            33       
+00000004  223C 5A580D10             34          move.l  #KEYCODE_FIRE<<BIT_OFFSET_SHOOT+KEYCODE_SECONDARY<<BIT_OFFSET_SECONDARY+KEYCODE_PAUSE<<BIT_OFFSET_PAUSE+KEYCODE_FOCUS<<BIT_OFFSET_FOCUS, d1         ;keypresses for actions(shoot, secondary, pause, and focus
+0000000A  4E4F                      35          trap    #15
+0000000C                            36          
+0000000C  2401                      37          move.l  d1, d2
+0000000E  223C 25272628             38          move.l  #KEYCODE_LEFT<<BIT_OFFSET_LEFT+KEYCODE_RIGHT<<BIT_OFFSET_RIGHT+KEYCODE_UP<<BIT_OFFSET_UP+KEYCODE_DOWN+BIT_OFFSET_DOWN<<BIT_OFFSET_DOWN, d1          ;keypresses for moving (left, right, up, down)
+00000014                            39          
+00000014  4E4F                      40          trap    #15
+00000016  4E75                      41          rts
+00000018                            42  
+00000018                            43  
+00000018                            44  
+00000018                            45  
+Line 46 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BIT_OFFSET_DOWN     0
+BIT_OFFSET_FOCUS    0
+BIT_OFFSET_LEFT     18
+BIT_OFFSET_PAUSE    8
+BIT_OFFSET_RIGHT    10
+BIT_OFFSET_SECONDARY  10
+BIT_OFFSET_SHOOT    18
+BIT_OFFSET_UP       8
+KEYCODE_DOWN        28
+KEYCODE_FIRE        5A
+KEYCODE_FOCUS       10
+KEYCODE_LEFT        25
+KEYCODE_PAUSE       D
+KEYCODE_RIGHT       27
+KEYCODE_SECONDARY   58
+KEYCODE_UP          26
+READ_INPUT          0
+TRAP_CODE_INPUT     13

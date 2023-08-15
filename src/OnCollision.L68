@@ -1,0 +1,131 @@
+0005B394 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/27/2023 1:06:24 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  OnCollision
+00000000                             3  * Written by :  Anthony Pizzigoni
+00000000                             4  * Date       :  7-6-23
+00000000                             5  * Description:  Handles everything that results from collision, as well as the OnCollision table.
+00000000                             6  *               Any collision function requires a0 being the actor and a1 being the actee. Moves to OnCollisionTable => (20*a0.type) + (4* a1.type)
+00000000                             7  *               For instance, a bullet collides with a player. Player never calls any function when colliding with a bullet, but the bullet hurts the player.
+00000000                             8  *               when the player is the actor, it goes to offset
+00000000                             9  *-----------------------------------------------------------
+00000000  =00000006                 10  NUM_COLLISION_ROWS          EQU         6
+00000000                            11  
+00000000                            12  NIL:
+00000000  4E75                      13      rts
+00000002                            14      
+00000002                            15  DESTROY_OBJ:
+00000002                            16  
+Line 17 ERROR: Undefined symbol
+00000002  137C 008E 4480            17      move.b  #STATUS_DEAD, GET_INFO(a1)
+00000008  2F08                      18      move.l  a0, -(SP)
+0000000A  2F09                      19      move.l  a1, -(SP)
+Line 20 ERROR: Undefined symbol
+0000000C  4EB9 004DBB8E             20      jsr KILL_ENTITY
+00000012  225F                      21      move.l  (SP)+, a1
+00000014  205F                      22      move.l  (SP)+, a0
+00000016  4E75                      23      rts
+00000018                            24      
+00000018                            25  CHECK_BULLET_PIERCE:
+00000018                            26      
+00000018  4E75                      27      rts
+0000001A                            28  
+0000001A                            29  DEAL_DAMAGE:
+Line 30 ERROR: Undefined symbol
+0000001A  3029 BB8E                 30      move.w  GET_HEALTH(a1), d0
+0000001E  4241                      31      clr.w   d1
+Line 32 ERROR: Undefined symbol
+00000020  1228 BB8E                 32      move.b  GET_POWER(a0), d1
+00000024  9041                      33      sub.w   d1, d0
+Line 34 ERROR: Undefined symbol
+00000026  3340 4480                 34      move.w  d0, GET_HEALTH(a1)
+0000002A  6F00 0004                 35      ble     KILL_OBJ
+0000002E  4E75                      36      rts     
+00000030                            37      KILL_OBJ:
+00000030  2F08                      38      move.l  a0, -(SP)
+00000032  2F09                      39      move.l  a1, -(SP)
+Line 40 ERROR: Undefined symbol
+00000034  4EB9 004DBB8E             40      jsr KILL_ENTITY
+0000003A  225F                      41      move.l  (SP)+, a1
+0000003C  205F                      42      move.l  (SP)+, a0
+0000003E  4E75                      43      rts
+00000040                            44      
+00000040                            45  GIVE_BONUS:
+00000040  4E75                      46      rts
+00000042                            47  
+00000042                            48  ;In this table, the TOP interacts with the SIDE
+00000042                            49  ON_COLLISION_FUNCTIONS:;PLAYER     PLAYER_BULLET    ENEMY   ENEMY_BULLET    SWORD(?)            PICKUP
+00000042= 00000000 00000000 ...     50      dc.l                NIL,        NIL,            NIL,    DEAL_DAMAGE,    NIL,                GIVE_BONUS         ;PLAYER
+0000005A= 00000000 00000000 ...     51      dc.l                NIL,        NIL,            DESTROY_OBJ,    NIL,      NIL,                NIL          ;PLAYER_BULLET
+00000072= 00000002 0000001A ...     52      dc.l                DESTROY_OBJ,DEAL_DAMAGE,    NIL,    NIL,            DEAL_DAMAGE,        NIL                ;ENEMY
+0000008A= 00000000 00000000 ...     53      dc.l                NIL,        NIL,            NIL,    NIL,            DESTROY_OBJ,        NIL                ;ENEMY_BULLET
+000000A2= 00000000 00000000 ...     54      dc.l                NIL,        NIL,            NIL,    NIL,            NIL,                NIL                ;SWORD
+000000BA= 00000000 00000000 ...     55      dc.l                NIL,        NIL,            NIL,    NIL,            NIL,                NIL                ;PICKUP
+000000D2                            56                           
+000000D2                            57      
+000000D2                            58      
+000000D2                            59  ;a0 and a1 are objects that are colliding.
+000000D2                            60  ON_COLLISION:
+000000D2                            61  
+000000D2  4286                      62      clr.l   d6
+000000D4  4287                      63      clr.l   d7
+000000D6  48C0                      64      ext.l   d0
+000000D8  48C1                      65      ext.l   d1
+000000DA  D1C0                      66      adda.l  d0, a0                                  ;a0 is player, a1 is slimberly
+000000DC  D3C1                      67      adda.l  d1, a1
+000000DE                            68      
+Line 69 ERROR: Invalid syntax
+000000DE                            69      move.b  (GET_ENTITY_TYPE+1)(a0), d6
+Line 70 ERROR: Invalid syntax
+000000DE                            70      move.b  (GET_ENTITY_TYPE+1)(a1), d7
+000000DE  45F8 0042                 71      lea     ON_COLLISION_FUNCTIONS, a2
+000000E2  CEFC 0006                 72      mulu.w  #NUM_COLLISION_ROWS, d7                 ;Getting the type of collision occuring for a1 onto a0.
+000000E6  E58E                      73      lsl.l   #2, d6
+000000E8  E58F                      74      lsl.l   #2, d7
+000000EA  DE46                      75      add.w   d6, d7
+000000EC  2032 7000                 76      move.l  (a2, d7), d0
+000000F0                            77      
+Line 78 ERROR: Invalid syntax
+000000F0                            78      move.b  (GET_ENTITY_TYPE+1)(a1), d6                 ;Getting the type of collision ocurring for a1 onto a0
+Line 79 ERROR: Invalid syntax
+000000F0                            79      move.b  (GET_ENTITY_TYPE+1)(a0), d7
+000000F0  CEFC 0006                 80      mulu.w  #NUM_COLLISION_ROWS, d7
+000000F4  E58E                      81      lsl.l   #2, d6
+000000F6  E58F                      82      lsl.l   #2, d7
+000000F8  DE46                      83      add.w   d6, d7
+000000FA  2232 7000                 84      move.l  (a2, d7), d1
+000000FE                            85      
+000000FE  2A40                      86      move.l  d0, a5
+00000100  2C41                      87      move.l  d1, a6
+00000102                            88      
+00000102  4E95                      89      jsr     (a5)
+00000104  2449                      90      move.l  a1, a2
+00000106  2248                      91      move.l  a0, a1
+00000108  204A                      92      move.l  a2, a0
+0000010A  4E96                      93      jsr     (a6)
+0000010C                            94      
+0000010C  4E75                      95      rts
+0000010E                            96      
+0000010E                            97      
+0000010E                            98  
+0000010E                            99  
+Line 100 WARNING: END directive missing, starting address not set
+
+10 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CHECK_BULLET_PIERCE  18
+DEAL_DAMAGE         1A
+DESTROY_OBJ         2
+GIVE_BONUS          40
+KILL_OBJ            30
+NIL                 0
+NUM_COLLISION_ROWS  6
+ON_COLLISION        D2
+ON_COLLISION_FUNCTIONS  42

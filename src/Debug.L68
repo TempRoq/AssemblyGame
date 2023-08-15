@@ -1,0 +1,92 @@
+0005B248 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/26/2023 11:48:43 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Debug
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:  Holds functions specifically for when debug mode is on. No functions take any arguments.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  SPAWN_DEBUG_ENEMIES:
+00000000                             9  *    move.l  #0, -(SP)
+00000000                            10  *    jsr     SET_STAGE_NUMBER
+00000000                            11  *    adda.l  #4, SP
+00000000                            12  *    jsr     SPAWN_NEXT_WAVE
+00000000                            13  
+00000000                            14  *    move.w  #85, -(SP)
+00000000                            15  *    move.w  #60, -(SP)
+00000000                            16  *    move.w  #$0000, -(SP)           ;theta
+00000000                            17  *    move.w  #0, -(SP)           ;Formation offset
+00000000                            18  *    
+00000000                            19  *    jsr     SPAWN_FORMATION
+00000000                            20  *    
+00000000                            21  *    adda.l  #8, SP
+00000000                            22  *    
+00000000                            23  *    move.w  #85, -(SP)
+00000000                            24  *    move.w  #60, -(SP)
+00000000                            25  *    move.w  #$05A0, -(SP)           ;theta
+00000000                            26  *    move.w  #0, -(SP)           ;Formation offset
+00000000                            27  *    
+00000000                            28  *    jsr     SPAWN_FORMATION
+00000000                            29  *    
+00000000                            30  *    adda.l  #8, SP
+00000000                            31  
+00000000                            32  *    
+00000000                            33  *    move.l  #$000005a0, -(SP)               ;No DelTheta + Theta
+00000000                            34  *    move.l  #$00000040, -(SP)               ;No ACC + Velocity
+00000000                            35  *    move.l  #0, -(SP)               ;Debug Path
+00000000                            36  *    move.l  #0, -(SP)               ;No Theta Initial
+00000000                            37  *    move.w  #80, -(SP)    ;Spawn Point X
+00000000                            38  *    move.w  #80, -(SP)    ;Spawn Point Y
+00000000                            39  *    move.l  #EDT_OFFSET_SLIME, -(SP)
+00000000                            40  *    jsr     TRY_SPAWN_ENTITY
+00000000                            41  *    adda.l  #24, SP
+00000000                            42  *    
+00000000                            43  *    move.l  #$00000000, -(SP)               ;No DelTheta + Theta
+00000000                            44  *    move.l  #$00000040, -(SP)               ;No ACC + Velocity
+00000000                            45  *    move.l  #0, -(SP)               ;Debug Path
+00000000                            46  *    move.l  #0, -(SP)               ;No Theta Initial
+00000000                            47  *    move.w  #80, -(SP)    ;Spawn Point X
+00000000                            48  *    move.w  #80, -(SP)    ;Spawn Point Y
+00000000                            49  *    move.l  #EDT_OFFSET_SLIME, -(SP)
+00000000                            50  *    jsr     TRY_SPAWN_ENTITY
+00000000                            51  *    adda.l  #24, SP
+00000000                            52  *    
+00000000                            53  *    move.l  #$00000000, -(SP)               ;No DelTheta + Theta
+00000000                            54  *    move.l  #$00000040, -(SP)               ;No ACC + Velocity
+00000000                            55  *    move.l  #0, -(SP)               ;Debug Path
+00000000                            56  *    move.l  #0, -(SP)               ;No Theta Initial
+00000000                            57  *    move.w  #85, -(SP)    ;Spawn Point X
+00000000                            58  *    move.w  #100, -(SP)    ;Spawn Point Y
+00000000                            59  *    move.l  #EDT_OFFSET_SLIME, -(SP)
+00000000                            60  *    jsr     TRY_SPAWN_ENTITY
+00000000                            61  *    adda.l  #24, SP
+00000000                            62  *    
+00000000                            63  *    move.l  #$00000000, -(SP)               ;No DelTheta + Theta
+00000000                            64  *    move.l  #$00000040, -(SP)               ;No ACC + Velocity
+00000000                            65  *    move.l  #0, -(SP)               ;Debug Path
+00000000                            66  *    move.l  #0, -(SP)               ;No Theta Initial
+00000000                            67  *    move.w  #85, -(SP)    ;Spawn Point X
+00000000                            68  *    move.w  #90, -(SP)    ;Spawn Point Y
+00000000                            69  *    move.l  #EDT_OFFSET_SLIME, -(SP)
+00000000                            70  *    jsr     TRY_SPAWN_ENTITY
+00000000                            71  *    adda.l  #24, SP
+00000000  4E75                      72      rts
+00000002                            73      
+00000002                            74      
+00000002                            75      
+00000002                            76      
+00000002                            77      
+00000002                            78      
+Line 79 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+SPAWN_DEBUG_ENEMIES  0

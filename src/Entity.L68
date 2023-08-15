@@ -1,0 +1,329 @@
+0005C7CA Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/21/2023 6:26:35 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Entity
+00000000                             3  * Written by : ANTHONY PIZZIGONI
+00000000                             4  * Date       : 6-26-23
+00000000                             5  * Description: Holds information about entities, the entity table, and the 
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000                             8  
+00000000                             9  
+00000000                            10      CLEAR_ENTITIES:
+00000000  72FF                      11          move.l      #$FFFFFFFF, d1  ;emptying out the table.
+00000002  243C 00FFFFFF             12          move.l      #$00FFFFFF, d2  ;specifically for setting that the object is inactive.
+00000008  41F9 00000164             13          lea         ENTITY_TABLE_START, a0
+Line 14 ERROR: Undefined symbol
+0000000E  103C 008E                 14          move.b      #MAX_NUM_ENTITIES, d0
+00000012  5300                      15          subi.b      #1, d0
+00000014                            16          ES_LOOP:
+00000014  20C1                      17             move.l   d1, (a0)+
+00000016  20C1                      18             move.l   d1, (a0)+
+00000018  20C1                      19             move.l   d1, (a0)+
+0000001A  20C1                      20             move.l   d1, (a0)+
+0000001C  20C1                      21             move.l   d1, (a0)+
+0000001E  20C1                      22             move.l   d1, (a0)+
+00000020  20C2                      23             move.l   d2, (a0)+
+00000022  20C1                      24             move.l   d1, (a0)+   
+00000024  5300                      25             subi.b   #1, d0 
+00000026  6CEC                      26             bge      ES_LOOP 
+00000028  4E75                      27          rts    
+0000002A                            28  
+0000002A                            29      ;a0 is the start of the index.
+0000002A                            30      ;d0 is the length. d1 is the entity offset.
+0000002A                            31      ;d2 as the point to spawn enemy from?
+0000002A                            32      
+0000002A                            33      ;CHANGED TO
+0000002A                            34      
+0000002A                            35      ;4(SP) is the entity offset
+0000002A                            36      ;8(SP) is the position to spawn them at
+0000002A                            37      ;12(SP) is the theta initial
+0000002A                            38      ;16(SP) is the path offset.
+0000002A                            39      ;20(SP) is initial speeds
+0000002A                            40      ;24(SP) is initial thetas
+0000002A                            41      
+0000002A                            42      TRY_SPAWN_ENTITY:
+0000002A  4285                      43              clr.l   d5
+0000002C  4282                      44              clr.l   d2
+0000002E                            45              
+0000002E  222F 0004                 46              move.l  4(SP), d1             ;d1 holds the entity offset
+00000032  E589                      47              lsl.l   #2, d1
+00000034                            48             
+00000034                            49              
+00000034  43F9 000001AC             50              lea     ENTITY_DATA_TABLE, a1
+0000003A  D3C1                      51              adda.l  d1, a1
+0000003C  2251                      52              move.l  (a1), a1              ;this is the entity data in a1 right now.
+0000003E  41F9 0000017C             53              lea     ENTITY_TABLE_BOUNDS, a0
+00000044                            54              
+Line 55 ERROR: Undefined symbol
+00000044  3429 BB8E                 55              move.w  GET_ENTITY_TYPE(a1), d2
+00000048  E78A                      56              lsl.l   #3, d2
+0000004A  2030 2004                 57              move.l  (4, a0, d2), d0       ;d0 holds how many items to rifle through
+0000004E  2070 2000                 58              move.l  (a0, d2), a0          ;a0 holds where to start searching
+00000052                            59              
+00000052                            60              
+00000052                            61              
+00000052                            62              
+00000052  5300                      63              subi.b  #1, d0
+00000054  EB88                      64              lsl.l   #5, d0              ;ENTITY SIZE = 32, so I can just shift the value to the left 5 times.
+00000056                            65              
+00000056                            66              ;mulu.w #ENTITY_SIZE, d0    ;in case this gets calle
+Line 67 ERROR: Undefined symbol
+00000056  0680 004DBB8E             67              addi.l  #GET_INFO, d0
+Line 68 ERROR: Undefined symbol
+0000005C  2A3C 004DBB8E             68              move.l  #ENTITY_SIZE, d5
+00000062                            69              
+00000062                            70          SEARCH_FOR_NEXT_FREE:
+00000062  1830 0000                 71              move.b  (a0, d0), d4
+00000066  6700 000A                 72              beq     FOUND_OBJ       ;if it's not active, it will be 00.
+0000006A  9085                      73              sub.l   d5, d0
+0000006C  6CF4                      74              bge     SEARCH_FOR_NEXT_FREE 
+0000006E  4280                      75              clr.l   d0
+00000070  4E75                      76              rts
+00000072                            77          FOUND_OBJ:
+00000072                            78              
+00000072                            79              ;finds data in entity table.
+00000072  D1C0                      80              adda.l  d0, a0
+Line 81 ERROR: Undefined symbol
+00000074  91FC 004DBB8E             81              suba.l  #GET_INFO, a0
+0000007A  2448                      82              movea.l a0, a2
+0000007C                            83              
+0000007C                            84              
+0000007C  24D9                      85              move.l  (a1)+, (a2)+ 
+0000007E  24D9                      86              move.l  (a1)+, (a2)+
+00000080  24EF 0008                 87              move.l  8(SP), (a2)+
+00000084  5889                      88              adda.l  #4, a1
+00000086  24D9                      89              move.l  (a1)+,(a2)+
+00000088  24D9                      90              move.l  (a1)+,(a2)+
+0000008A  24D9                      91              move.l  (a1)+,(a2)+
+0000008C  24D9                      92              move.l  (a1)+,(a2)+
+0000008E  24FC FFFFFFFF             93              move.l  #$FFFFFFFF, (a2)+               ;this needs to be a path handler address
+00000094                            94                                              ;and that path handler address needs to take this
+00000094                            95  
+00000094                            96   
+Line 97 ERROR: Undefined symbol
+00000094  117C 00FF 4480            97              move.b  #$FF, GET_INFO(a0)      
+0000009A  222F 000C                 98              move.l  12(SP), d1
+Line 99 ERROR: Undefined symbol
+0000009E  1141 4480                 99              move.b  d1, GET_THETA(a0)
+000000A2                           100              
+000000A2                           101              ;Path offset being FFFF means it doesn't want a path handler. No path to follow. Good for basic ass bullets.
+000000A2  222F 0010                102              move.l  16(SP), d1
+000000A6  0C01 00FF                103              cmpi.b  #$FF, d1
+000000AA  6700 001C                104              beq     NO_PATH_HANDLER
+000000AE                           105              
+000000AE  2F2F 0018                106              move.l  24(SP), -(SP)
+000000B2  2F2F 0014                107              move.l  20(SP), -(SP)
+000000B6  2F01                     108              move.l  d1, -(SP)
+Line 109 ERROR: Undefined symbol
+000000B8  4EB9 004DBB8E            109              jsr FIND_NEW_PATH_HANDLER
+000000BE  DFFC 0000000C            110              adda.l  #12, SP
+Line 111 ERROR: Undefined symbol
+000000C4  2149 4480                111              move.l  a1, GET_ENTITY_PATH_ADDRESS(a0)
+000000C8                           112              NO_PATH_HANDLER:
+000000C8  4E75                     113              rts
+000000CA                           114       
+000000CA                           115  
+000000CA                           116      ENTITY_UPDATE:
+000000CA  4DF9 00000164            117            lea ET_PLAYER_BULLETS_START, a6
+000000D0                           118            
+000000D0                           119            
+000000D0                           120            
+Line 121 ERROR: Undefined symbol
+000000D0  2E3C 004DBB8E            121            move.l  #MAX_NUM_PLAYER_BULLETS, d7
+000000D6  5387                     122            subi.l    #1, d7
+000000D8  EB8F                     123            lsl.l   #5, d7                           ;cuz size of 32 bytes. Easiest money of my life.
+000000DA                           124                  
+000000DA                           125  *                
+000000DA                           126  *               BULLET UPDATE
+000000DA                           127  *                
+000000DA                           128                  
+000000DA  103C 0050                129                  move.b  #80, d0
+Line 130 ERROR: Undefined symbol
+000000DE  223C 004DBB8E            130                  move.l  #COLOR_PLAYER_BULLET_OUTER, d1
+000000E4  4E4F                     131                  trap    #15    
+000000E6                           132                  
+000000E6  103C 0051                133                  move.b  #81, d0
+Line 134 ERROR: Undefined symbol
+000000EA  223C 004DBB8E            134                  move.l  #COLOR_PLAYER_BULLET_INNER, d1
+000000F0  4E4F                     135                  trap    #15
+000000F2                           136                  
+000000F2                           137                  EU_BULLET_LOOP:        
+Line 138 ERROR: Undefined symbol
+000000F2  1036 708E                138                  move.b  (GET_INFO,a6, d7), d0        
+000000F6  6700 0018                139                  beq EU_BULLET_INACTIVE_OBJ     
+000000FA                           140                  
+000000FA  2076 7000                141                  movea.l   (a6,d7), a0
+Line 142 ERROR: Undefined symbol
+000000FE  4EB9 004DBB8E            142                  jsr       INVAL_OBJECT
+00000104                           143                  ;PATH_UPDATE: Update position based on velocity and theta.
+Line 144 ERROR: Undefined symbol
+00000104  4EB9 004DBB8E            144                  jsr       SET_COLLISION_ZONE
+Line 145 ERROR: Undefined symbol
+0000010A  4EB9 004DBB8E            145                  jsr       DRAW_PLAYER_BULLET
+00000110                           146                    
+00000110                           147                  EU_BULLET_INACTIVE_OBJ:  
+Line 148 ERROR: Undefined symbol
+00000110  0487 004DBB8E            148                  subi.l  #ENTITY_SIZE, d7
+00000116  6CDA                     149                  bge     EU_BULLET_LOOP
+00000118                           150                  
+00000118                           151  *                
+00000118                           152  *               ENEMIES
+00000118                           153  *                
+00000118                           154                  
+00000118  4DF9 00000164            155                  lea ET_ENEMIES_START, a6
+Line 156 ERROR: Invalid syntax
+0000011E                           156                  move.l  #(MAX_NUM_ENEMIES-1), d7
+0000011E  EB4F                     157                  lsl #5, d7             
+00000120  204E                     158                  move.l  a6, a0
+00000122  D1C7                     159                  adda.l  d7, a0
+Line 160 ERROR: Symbol value differs between first and second pass
+00000124                           160                  EU_ENEMY_LOOP:
+Line 161 ERROR: Undefined symbol
+00000124  1036 708E                161                  move.b  (GET_INFO,a6, d7), d0
+00000128  6700 0030                162                  beq     EU_ENEMY_INACTIVE
+Line 163 ERROR: Undefined symbol
+0000012C  4EB9 004DBB8E            163                  jsr     INVAL_OBJECT
+00000132  204E                     164                  move.l  a6, a0
+00000134  D1C7                     165                  adda.l  d7, a0
+00000136                           166                  
+00000136  2F0E                     167                  move.l  a6, -(SP)
+00000138  2F07                     168                  move.l  d7, -(SP)
+0000013A  2F08                     169                  move.l  a0, -(SP)
+Line 170 ERROR: Undefined symbol
+0000013C  4EB9 004DBB8E            170                  jsr PATH_UPDATES
+00000142  2EC8                     171                  move.l  a0, (SP)+
+00000144  2EC7                     172                  move.l  d7, (SP)+
+00000146  2ECE                     173                  move.l  a6, (SP)+
+00000148                           174                  
+Line 175 ERROR: Undefined symbol
+00000148  4EB9 004DBB8E            175                  jsr     SET_COLLISION_ZONE
+Line 176 ERROR: Undefined symbol
+0000014E  4EB9 004DBB8E            176                  jsr     DRAW_SLIME
+00000154                           177                  
+Line 178 ERROR: Symbol value differs between first and second pass
+00000154                           178                  EU_ENEMY_INACTIVE:
+00000154                           179                  
+Line 180 ERROR: Undefined symbol
+00000154  0487 004DBB8E            180                  subi.l  #ENTITY_SIZE, d7
+0000015A  6CCE                     181                  bge     EU_ENEMY_LOOP
+0000015C                           182                               
+0000015C  4E75                     183             rts
+0000015E                           184                  
+Line 185 ERROR: Symbol value differs between first and second pass
+0000015E                           185  EN_FUNC_VAR_TABLE       ;Take Damage, die, collision, draw call, and color.
+0000015E                           186  
+0000015E                           187         
+0000015E                           188  
+Line 189 ERROR: Symbol value differs between first and second pass
+0000015E                           189  ENTITY_TABLE_START
+Line 190 ERROR: Symbol value differs between first and second pass
+0000015E                           190  ET_PLAYER_START
+Line 191 ERROR: Undefined symbol
+0000015E                           191      ds.b        MAX_NUM_PLAYERS*ENTITY_SIZE                   
+Line 192 ERROR: Symbol value differs between first and second pass
+0000015E                           192  ET_PLAYER_BULLETS_START
+Line 193 ERROR: Undefined symbol
+0000015E                           193      ds.b        MAX_NUM_PLAYER_BULLETS*ENTITY_SIZE
+Line 194 ERROR: Symbol value differs between first and second pass
+0000015E                           194  ET_PLAYER_SWORD_START
+Line 195 ERROR: Undefined symbol
+0000015E                           195      ds.b        MAX_NUM_PLAYER_SWORD*ENTITY_SIZE
+Line 196 ERROR: Symbol value differs between first and second pass
+0000015E                           196  ET_ENEMIES_START
+Line 197 ERROR: Undefined symbol
+0000015E                           197      ds.b        MAX_NUM_ENEMIES*ENTITY_SIZE
+Line 198 ERROR: Symbol value differs between first and second pass
+0000015E                           198  ET_ENEMY_BULLETS_START
+Line 199 ERROR: Undefined symbol
+0000015E                           199      ds.b        MAX_NUM_ENEMY_BULLETS*ENTITY_SIZE
+Line 200 ERROR: Symbol value differs between first and second pass
+0000015E                           200  ET_PICKUPS_START
+Line 201 ERROR: Undefined symbol
+0000015E                           201      ds.b        MAX_NUM_PICKUPS*ENTITY_SIZE
+Line 202 ERROR: Symbol value differs between first and second pass
+0000015E                           202  ET_END
+0000015E                           203  
+0000015E                           204  
+0000015E                           205  
+Line 206 ERROR: Symbol value differs between first and second pass
+0000015E                           206  ENTITY_NUM_ACTIVE
+0000015E= 00000000                 207      dc.l    0
+00000162= 00000000                 208      dc.l    0
+00000166= 00000000                 209      dc.l    0
+0000016A= 00000000                 210      dc.l    0
+0000016E= 00000000                 211      dc.l    0
+00000172= 00000000                 212      dc.l    0
+00000176                           213  
+00000176                           214  ;when iterating through to find what to spawn use this. based on the 'layer' of the object, finds an open entity spot in the pool. The rightmost 
+Line 215 ERROR: Symbol value differs between first and second pass
+00000176                           215  ENTITY_TABLE_BOUNDS
+Line 216 ERROR: Undefined symbol
+00000176= 00000164 00000164        216      dc.l    ET_PLAYER_START, MAX_NUM_PLAYERS
+Line 217 ERROR: Undefined symbol
+0000017E= 00000164 00000164        217      dc.l    ET_PLAYER_BULLETS_START, MAX_NUM_PLAYER_BULLETS
+Line 218 ERROR: Undefined symbol
+00000186= 00000164 00000164        218      dc.l    ET_ENEMIES_START, MAX_NUM_ENEMIES
+Line 219 ERROR: Undefined symbol
+0000018E= 00000164 00000164        219      dc.l    ET_ENEMY_BULLETS_START, MAX_NUM_ENEMY_BULLETS
+Line 220 ERROR: Undefined symbol
+00000196= 00000164 00000164        220      dc.l    ET_PLAYER_SWORD_START, MAX_NUM_PLAYER_SWORD
+Line 221 ERROR: Undefined symbol
+0000019E= 00000164 00000164        221      dc.l    ET_PICKUPS_START, MAX_NUM_PICKUPS 
+000001A6                           222  
+000001A6                           223  PLAYER_DATA     INCBIN      'data/Entities/PlayerData.bin'
+Line 224 ERROR: Symbol value differs between first and second pass
+000001A6                           224  PLAYER_DATA     INCBIN      'data/Entities/PlayerData.bin'
+000001A6                           225  SLIME_DATA      INCBIN      'data/Entities/SlimeData.bin'
+Line 226 ERROR: Symbol value differs between first and second pass
+000001A6                           226  SLIME_DATA      INCBIN      'data/Entities/SlimeData.bin'
+000001A6                           227  
+Line 228 ERROR: Symbol value differs between first and second pass
+000001A6                           228  ENTITY_DATA_TABLE:
+000001A6= 000001AC                 229      dc.l    PLAYER_DATA
+000001AA= 000001AC                 230      dc.l    SLIME_DATA
+000001AE                           231  
+000001AE                           232  
+000001AE                           233  
+000001AE                           234  
+000001AE                           235  
+000001AE                           236  
+000001AE                           237  
+000001AE                           238  
+000001AE                           239  
+Line 240 WARNING: END directive missing, starting address not set
+
+52 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CLEAR_ENTITIES      0
+ENTITY_DATA_TABLE   1AC
+ENTITY_NUM_ACTIVE   164
+ENTITY_TABLE_BOUNDS  17C
+ENTITY_TABLE_START  164
+ENTITY_UPDATE       CA
+EN_FUNC_VAR_TABLE   164
+ES_LOOP             14
+ET_END              164
+ET_ENEMIES_START    164
+ET_ENEMY_BULLETS_START  164
+ET_PICKUPS_START    164
+ET_PLAYER_BULLETS_START  164
+ET_PLAYER_START     164
+ET_PLAYER_SWORD_START  164
+EU_BULLET_INACTIVE_OBJ  110
+EU_BULLET_LOOP      F2
+EU_ENEMY_INACTIVE   15A
+EU_ENEMY_LOOP       12A
+FOUND_OBJ           72
+NO_PATH_HANDLER     C8
+PLAYER_DATA         1AC
+SEARCH_FOR_NEXT_FREE  62
+SLIME_DATA          1AC
+TRY_SPAWN_ENTITY    2A

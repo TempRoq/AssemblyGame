@@ -1,0 +1,150 @@
+0005B20A Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/25/2023 4:43:52 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Definitions and Equates
+00000000                             3  * Written by :  Anthony Pizzigoni
+00000000                             4  * Date       :  7/3/2023
+00000000                             5  * Description:  Throwing general equates into here to make it less muddy everywhere else.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000  =000000BA                  8  STAGE_BORDER_X_MAX              EQU     186
+00000000  =000000F0                  9  STAGE_BORDER_Y_MAX              EQU     240
+00000000                            10  
+00000000  =00000055                 11  PLAYER_SPAWN_POINT_X            EQU     85
+00000000  =000000BE                 12  PLAYER_SPAWN_POINT_Y            EQU     190
+00000000                            13  
+00000000  =00000002                 14  PIXEL_SHIFT                    EQU     2
+00000000  =00001680                 15  ANGLE_MAX                       EQU         $1680
+00000000                            16  
+00000000                            17  
+00000000  =00000000                 18  EDT_OFFSET_PLAYER               EQU         $00
+00000000  =00000001                 19  EDT_OFFSET_SLIME                EQU         $01
+00000000  =00000002                 20  EDT_OFFSET_BULLET               EQU         $02
+00000000  =00000003                 21  EDT_OFFSET_ROBOT                EQU         $03
+00000000                            22  
+00000000                            23  
+00000000  =00000000                 24  GET_VELOCITY                    EQU         0   ;Get the velocity, 1 byte, unsigned, 2 fractional bits. max velocity of 63.75 (FF)
+00000000  =00000001                 25  GET_ACCELERATION                EQU         1   ;Get acceleration, 1 byte, signed, 4 fractional bits. Max Velocity of ~8 (7F)
+00000000  =00000002                 26  GET_THETA                       EQU         2   ;Get velocity, 1 byte, the value is 1/4 of actual theta, as theta is only in chunks of 4
+00000000  =00000003                 27  GET_ANG_VEL                     EQU         3   ;Get angular velocity, 1 byte, signed.
+00000000  =00000004                 28  GET_SPRITE                      EQU         4   ;Go to sprite table and grip up this offset. 1 byte, unsigned. Sprite table holds a table of top left offsets and indexes that load these top left corners.
+00000000  =00000005                 29  GET_PATH_INSTRUCTION            EQU         5   ;Get the offset for the Path that this object is following. 1 byte unsigned.
+00000000  =00000006                 30  GET_PATH_INSTRUCTION_OFFSET     EQU         6   ;Get the offset of the offset (what stage it is on). 1 byte unsigned (if they go longer, use the FD command to link them.
+00000000  =00000007                 31  GET_POWER                       EQU         7   ;Get the power of the object. Power changes between each entity. It could be damage they deal on contact, piercing, number of bombs, etc. 1 byte
+00000000  =00000008                 32  GET_POSITION                    EQU         8   ;Get the top left of the object on screen. 1 long word. Vec2
+00000000  =0000000C                 33  GET_SIZE                        EQU         12  ;Get the width and height of the object on scree. 1 long word. Vec2
+00000000  =00000010                 34  GET_COLLISION_BOX_TL            EQU         16  ;Get the top left of the collision box. 1 long word. Vec2. it is an offset from the top left corner.
+00000000  =00000014                 35  GET_COLLISION_BOX_BOUNDS        EQU         20  ;Get the bounds of the collision box. 1 long word. Vec2.
+00000000  =00000016                 36  GET_HEALTH                      EQU         22  ;Get the health of the object. 1 word, will have to check and see.
+00000000  =00000018                 37  GET_INFO                        EQU         24  ;1 word. Most Significant Byte = "are they active" (FF = true, 00 = false). Least Significant Byte = $0("What quadrant and subquadrant are they in?")
+00000000  =0000001A                 38  GET_ENTITY_TYPE                 EQU         26  ;Most significant byte: What variation of that eneity. Least significant byte: what type of entity                                               
+00000000  =0000001C                 39  GET_ENTITY_PATH_ADDRESS         EQU         28  ;OR Path Handler address? The address where this entity's data is stored. 1 long.
+00000000                            40  
+00000000                            41  
+00000000                            42  
+00000000                            43  
+00000000                            44  
+00000000                            45  
+00000000                            46  
+00000000  =002A6387                 47  COLOR_PLAYER_BULLET_OUTER       EQU         $2A6387
+00000000  =00E3F4FF                 48  COLOR_PLAYER_BULLET_INNER       EQU         $E3F4FF
+00000000  =00000058                 49  TRAP_PLAYER_BULLET_SHAPE        EQU         88
+00000000                            50  
+00000000                            51  
+00000000  =00000037                 52  MAX_NUM_ENTITIES                EQU     55
+00000000  =00000001                 53  MAX_NUM_PLAYERS                 EQU     1
+00000000  =00000004                 54  MAX_NUM_PLAYER_BULLETS          EQU     4
+00000000  =00000020                 55  MAX_NUM_ENEMIES                 EQU     32
+00000000  =0000001E                 56  MAX_NUM_ENEMY_BULLETS           EQU     30
+00000000  =00000001                 57  MAX_NUM_PLAYER_SWORD            EQU     1
+00000000  =00000003                 58  MAX_NUM_PICKUPS                 EQU     3
+00000000  =00000020                 59  ENTITY_SIZE                     EQU     32
+00000000                            60  
+00000000                            61  
+00000000  =000002EC                 62  HUD_OFFSET_X                    EQU     748
+00000000  =FFFFFFFC                 63  HUD_OFFSET_Y                    EQU     -4
+00000000                            64  
+00000000  =00000046                 65  HUD_WIDTH                       EQU     70
+00000000  =000000F0                 66  HUD_HEIGHT                      EQU     240
+00000000                            67  
+00000000                            68  
+00000000                            69  
+00000000  =00000400                 70  SCREEN_SIZE_PIXELS_X        EQU     1024
+00000000  =000003C0                 71  SCREEN_SIZE_PIXELS_Y        EQU     960
+00000000                            72  
+00000000                            73  
+00000000  =00000000                 74  GAME_STATE_MAIN_MENU        EQU     0 
+00000000  =00000001                 75  GAME_STATE_PLAYING          EQU     1
+00000000  =00000002                 76  GAME_STATE_PAUSED           EQU     2
+00000000  =00000003                 77  GAME_STATE_HI_SCORE         EQU     3
+00000000                            78  
+00000000                            79  
+00000000  =000000FF                 80  STATUS_ALIVE                EQU     $FF
+00000000  =00000000                 81  STATUS_DEAD                 EQU     $00
+00000000                            82  
+00000000                            83  
+00000000                            84  
+00000000                            85  
+00000000                            86  
+00000000                            87  
+00000000                            88  
+Line 89 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ANGLE_MAX           1680
+COLOR_PLAYER_BULLET_INNER  E3F4FF
+COLOR_PLAYER_BULLET_OUTER  2A6387
+EDT_OFFSET_BULLET   2
+EDT_OFFSET_PLAYER   0
+EDT_OFFSET_ROBOT    3
+EDT_OFFSET_SLIME    1
+ENTITY_SIZE         20
+GAME_STATE_HI_SCORE  3
+GAME_STATE_MAIN_MENU  0
+GAME_STATE_PAUSED   2
+GAME_STATE_PLAYING  1
+GET_ACCELERATION    1
+GET_ANG_VEL         3
+GET_COLLISION_BOX_BOUNDS  14
+GET_COLLISION_BOX_TL  10
+GET_ENTITY_PATH_ADDRESS  1C
+GET_ENTITY_TYPE     1A
+GET_HEALTH          16
+GET_INFO            18
+GET_PATH_INSTRUCTION  5
+GET_PATH_INSTRUCTION_OFFSET  6
+GET_POSITION        8
+GET_POWER           7
+GET_SIZE            C
+GET_SPRITE          4
+GET_THETA           2
+GET_VELOCITY        0
+HUD_HEIGHT          F0
+HUD_OFFSET_X        2EC
+HUD_OFFSET_Y        FFFFFFFC
+HUD_WIDTH           46
+MAX_NUM_ENEMIES     20
+MAX_NUM_ENEMY_BULLETS  1E
+MAX_NUM_ENTITIES    37
+MAX_NUM_PICKUPS     3
+MAX_NUM_PLAYERS     1
+MAX_NUM_PLAYER_BULLETS  4
+MAX_NUM_PLAYER_SWORD  1
+PIXEL_SHIFT         2
+PLAYER_SPAWN_POINT_X  55
+PLAYER_SPAWN_POINT_Y  BE
+SCREEN_SIZE_PIXELS_X  400
+SCREEN_SIZE_PIXELS_Y  3C0
+STAGE_BORDER_X_MAX  BA
+STAGE_BORDER_Y_MAX  F0
+STATUS_ALIVE        FF
+STATUS_DEAD         0
+TRAP_PLAYER_BULLET_SHAPE  58

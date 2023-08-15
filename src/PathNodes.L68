@@ -1,0 +1,200 @@
+0005C808 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/22/2023 3:02:30 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : PATH_NODE
+00000000                             3  * Written by : Anthony Pizzigoni
+00000000                             4  * Date       : 7/11/23
+00000000                             5  * Description: Path nodes are the core of the pathing system, which hold an instruction, a 
+00000000                             6  *-----------------------------------------------------------
+00000000  =00000008                  7  PATH_NODE_SIZE                  EQU        8
+00000000                             8  
+00000000  =00000000                  9  GET_PATHNODE_END                EQU        0        ;1 byte
+00000000  =00000001                 10  GET_PATHNODE_TYPE               EQU        1        ;1 byte
+00000000  =00000002                 11  GET_PATHNODE_TIME_ELAPSED       EQU        2        ;1 word?
+00000000  =00000004                 12  GET_PATHNODE_ARG_1              EQU        4        ;1 word?
+00000000  =00000006                 13  GET_PATHNODE_ARG_2              EQU        6        ;1 word?
+00000000                            14  
+00000000                            15  
+00000000  =00000000                 16  PATHNODE_TYPE_SET_THETAS        EQU         0       
+00000000  =00000001                 17  PATHNODE_TYPE_ADD_THETAS        EQU         1
+00000000  =00000002                 18  PATHNODE_TYPE_SET_SPEEDS        EQU         2
+00000000  =00000003                 19  PATHNODE_TYPE_ADD_SPEEDS        EQU         3
+00000000  =00000004                 20  PATHNODE_TYPE_SPAWN_FORM        EQU         4
+00000000  =00000005                 21  PATHNODE_TYPE_JUMP_TO_PATH      EQU         5
+00000000  =00000006                 22  PATHNODE_TYPE_RESET_PATH        EQU         6
+00000000                            23  
+00000000                            24  ;4(SP) = Entity
+00000000                            25  ;8(SP) = Path handler to Update
+00000000                            26  
+00000000                            27  
+00000000                            28  NEXT_PATH_NODE:
+00000000                            29      ;Get Path[PATH_NODE_OFFSET]
+00000000                            30      ;Use its flag to determine which instruction to do in Instruction bank
+00000000                            31      ;Set timer for PathNodeUpdate after Path.TIME_BETWEEN.
+00000000                            32      ;Inc Path[PATH_NODE_OFFSET] by 1
+00000000  206F 0004                 33      move.l  4(SP), a0
+00000004  226F 0008                 34      move.l  8(SP), a1
+00000008                            35      
+Line 36 ERROR: Undefined symbol
+00000008  2469 BB8E                 36      move.l  GET_PATH_ADDR(a1), a2
+0000000C  4280                      37      clr.l   d0
+Line 38 ERROR: Undefined symbol
+0000000E  3029 BB8E                 38      move.w  GET_PATH_NODE_OFFSET(a1), d0
+00000012  E788                      39      lsl.l   #3, d0
+00000014  D5C0                      40      adda.l  d0, a2                  ;a0 has entity, a1 has the path handler, a2 has the current node on path, 
+00000016  4280                      41      clr.l   d0
+00000018  47F9 000000F0             42      lea     INSTRUCTION_BANK, a3
+0000001E  102A 0001                 43      move.b  GET_PATHNODE_TYPE(a2), d0
+00000022  E588                      44      lsl.l   #2, d0                  ;multiply by 4 to account for size of an instruction. Finding instruction in the instruction bank.
+00000024  D7C0                      45      adda.l  d0, a3
+00000026  2653                      46      move.l  (a3), a3
+00000028                            47      
+00000028                            48      
+00000028  102A 0000                 49      move.b  GET_PATHNODE_END(a2), d0
+0000002C  48E7 80D0                 50      movem.l d0/a0/a1/a3, -(SP)
+00000030  4E93                      51      jsr     (a3)                    ;Passing arguments because these functions will NEVER be called outside of  here.
+00000032  4CDF 0B01                 52      movem.l (SP)+, d0/a0/a1/a3
+00000036                            53      
+00000036  1200                      54      move.b  d0, d1
+00000038  6700 0026                 55      beq     NO_NEXT_PATH_TIMER
+0000003C                            56      
+0000003C                            57      
+0000003C                            58      ;Path node offset needs to be updated and the timer needs to be called IFF GET_PATHNODE_END == 00.
+Line 59 ERROR: Undefined symbol
+0000003C  5269 4480                 59      addi.w  #1, GET_PATH_NODE_OFFSET(a1)
+00000040  508A                      60      adda.l  #PATH_NODE_SIZE, a2
+00000042  4280                      61      clr.l   d0
+00000044  2F09                      62      move.l  a1, -(SP)           ;path handler       at input 2
+00000046  2F08                      63      move.l  a0, -(SP)           ;entity             at input 1
+00000048  47F8 0000                 64      lea     NEXT_PATH_NODE, a3
+0000004C  2F0B                      65      move.l  a3, -(SP)
+0000004E  302A 0002                 66      move.w  GET_PATHNODE_TIME_ELAPSED(a2), d0
+00000052  2F00                      67      move.l  d0, -(SP)
+Line 68 ERROR: Undefined symbol
+00000054  4EB9 004DBB8E             68      jsr SET_TIMER
+0000005A  DFFC 00000010             69      adda.l  #16, SP
+00000060                            70      NO_NEXT_PATH_TIMER:
+00000060  4E75                      71      rts
+00000062                            72      
+00000062                            73  
+00000062                            74  SET_THETAS:
+Line 75 ERROR: Undefined symbol
+00000062  4269 BB8E                 75      clr.w   GET_PH_DEL_THET(a1)
+Line 76 ERROR: Undefined symbol
+00000066  4269 BB8E                 76      clr.w   GET_PH_THETA(a1)
+0000006A                            77  ADD_THETAS:
+0000006A  302A 0004                 78      move.w  GET_PATHNODE_ARG_1(a2), d0
+Line 79 ERROR: Undefined symbol
+0000006E  D169 4480                 79      add.w  d0, GET_PH_DEL_THET(a1)
+00000072  302A 0006                 80      move.w  GET_PATHNODE_ARG_2(a2), d0
+Line 81 ERROR: Undefined symbol
+00000076  D169 4480                 81      add.w  d0, GET_PH_THETA(a1)
+0000007A  4E75                      82      rts
+0000007C                            83  
+0000007C                            84  SET_SPEEDS:
+Line 85 ERROR: Undefined symbol
+0000007C  4269 BB8E                 85      clr.w   GET_PH_ACC(a1)
+Line 86 ERROR: Undefined symbol
+00000080  4269 BB8E                 86      clr.w   GET_PH_VEL(a1)
+00000084                            87  ADD_SPEEDS:
+00000084  302A 0004                 88      move.w  GET_PATHNODE_ARG_1(a2), d0
+Line 89 ERROR: Undefined symbol
+00000088  D169 4480                 89      add.w  d0, GET_PH_ACC(a1)
+0000008C  302A 0006                 90      move.w  GET_PATHNODE_ARG_2(a2), d0
+Line 91 ERROR: Undefined symbol
+00000090  D169 4480                 91      add.w  d0, GET_PH_VEL(a1)
+00000094  4E75                      92      rts
+00000096                            93      
+00000096                            94  SPAWN_FORM:
+00000096  4281                      95      clr.l   d1
+00000098  4282                      96      clr.l   d2
+Line 97 ERROR: Undefined symbol
+0000009A  2028 BB8E                 97      move.l  GET_POSITION(a0), d0
+0000009E  322A 0004                 98      move.w  GET_PATHNODE_ARG_1(a2), d1
+000000A2  342A 0006                 99      move.w  GET_PATHNODE_ARG_2(a2), d2
+000000A6  2F00                     100      move.l  d0, -(SP)
+000000A8  3F01                     101      move.w  d1, -(SP)
+000000AA  3F02                     102      move.w  d2, -(SP)
+Line 103 ERROR: Undefined symbol
+000000AC  4EB9 004DBB8E            103      jsr SPAWN_FORMATION
+000000B2  508F                     104      adda.l  #8, SP
+000000B4  4E75                     105      rts    
+000000B6                           106  JUMP_TO_PATH:
+000000B6  4280                     107      clr.l   d0
+000000B8  4281                     108      clr.l   d1
+000000BA  302A 0004                109      move.w  GET_PATHNODE_ARG_1(a2), d0      ;d0 = path offset
+000000BE  E588                     110      lsl.l   #2, d0
+Line 111 ERROR: Undefined symbol
+000000C0  47F9 004DBB8E            111      lea PATH_BANK, a3
+Line 112 ERROR: Undefined symbol
+000000C6  2373 0000 4480           112      move.l  (a3, d0), GET_PATH_ADDR(a1)
+Line 113 ERROR: Undefined symbol
+000000CC  336A 0006 4480           113      move.w  GET_PATHNODE_ARG_2(a2), GET_PATH_NODE_OFFSET(a1)
+Line 114 ERROR: Undefined symbol
+000000D2  5369 4480                114      subi.w  #1, GET_PATH_NODE_OFFSET(a1)
+000000D6  4E75                     115      rts
+000000D8                           116     
+000000D8                           117  
+000000D8                           118  ;Set path node offset to be -1 and for the current node in memory to be 1 path node behind where it should be, to account for incrementation.
+000000D8                           119  LOOP_OVER_PATH:
+Line 120 ERROR: Undefined symbol
+000000D8  337C FFFF 4480           120      move.w  #-1, GET_PATH_NODE_OFFSET(a1)
+Line 121 ERROR: Undefined symbol
+000000DE  2469 BB8E                121      move.l  GET_PATH_ADDR(a1), a2
+000000E2  4280                     122      clr.l   d0
+Line 123 ERROR: Undefined symbol
+000000E4  3029 BB8E                123      move.w  GET_PATH_NODE_OFFSET(a1), d0
+000000E8  E788                     124      lsl.l   #3, d0
+000000EA  D5C0                     125      adda.l  d0, a2
+000000EC  518A                     126      suba.l  #PATH_NODE_SIZE, a2  
+000000EE  4E75                     127      rts
+000000F0                           128      
+000000F0                           129      
+000000F0                           130  INSTRUCTION_BANK
+000000F0= 00000062                 131      dc.l    SET_THETAS
+000000F4= 0000006A                 132      dc.l    ADD_THETAS
+000000F8= 0000007C                 133      dc.l    SET_SPEEDS
+000000FC= 00000084                 134      dc.l    ADD_SPEEDS
+00000100= 00000096                 135      dc.l    SPAWN_FORM
+00000104= 000000B6                 136      dc.l    JUMP_TO_PATH
+00000108= 000000D8                 137      dc.l    LOOP_OVER_PATH
+0000010C                           138      
+0000010C                           139      
+0000010C                           140  TEST_AREA:
+0000010C  4E75                     141      rts
+0000010E                           142      
+Line 143 WARNING: END directive missing, starting address not set
+
+21 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADD_SPEEDS          84
+ADD_THETAS          6A
+GET_PATHNODE_ARG_1  4
+GET_PATHNODE_ARG_2  6
+GET_PATHNODE_END    0
+GET_PATHNODE_TIME_ELAPSED  2
+GET_PATHNODE_TYPE   1
+INSTRUCTION_BANK    F0
+JUMP_TO_PATH        B6
+LOOP_OVER_PATH      D8
+NEXT_PATH_NODE      0
+NO_NEXT_PATH_TIMER  60
+PATHNODE_TYPE_ADD_SPEEDS  3
+PATHNODE_TYPE_ADD_THETAS  1
+PATHNODE_TYPE_JUMP_TO_PATH  5
+PATHNODE_TYPE_RESET_PATH  6
+PATHNODE_TYPE_SET_SPEEDS  2
+PATHNODE_TYPE_SET_THETAS  0
+PATHNODE_TYPE_SPAWN_FORM  4
+PATH_NODE_SIZE      8
+SET_SPEEDS          7C
+SET_THETAS          62
+SPAWN_FORM          96
+TEST_AREA           10C

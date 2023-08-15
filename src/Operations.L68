@@ -1,0 +1,307 @@
+0005C83C Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/24/2023 10:00:41 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Operations
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000000  =00000000                  8  GS_PLAY_TOP_LEFT_X      EQU     0
+00000000  =00000000                  9  GS_PLAY_TOP_LEFT_Y      EQU     0
+00000000                            10  
+00000000  =000000BA                 11  GS_PLAY_BOT_RIGHT_X     EQU     186
+00000000  =000000F0                 12  GS_PLAY_BOT_RIGHT_Y     EQU     240
+00000000                            13  
+00000000  =00000040                 14  GS_PAUSE_TOP_LEFT_X     EQU     64
+00000000  =0000003C                 15  GS_PAUSE_TOP_LEFT_Y     EQU     60
+00000000                            16  
+00000000  =000000C0                 17  GS_PAUSE_BOT_RIGHT_X    EQU     192
+00000000  =000000B4                 18  GS_PAUSE_BOT_RIGHT_Y    EQU     180
+00000000                            19  
+00000000                            20  
+00000000                            21  
+00000000                            22  
+00000000                            23  CLEAN_SCREEN:
+00000000                            24  
+00000000                            25      ;swap buffer
+00000000  303C 005E                 26      move.w  #94, d0
+00000004  4E4F                      27      trap    #15
+00000006                            28  
+00000006                            29      ;drawing a black block over part of the screen to "clear it"
+00000006  4281                      30      clr.l   d1
+00000008  303C 0050                 31      move.w  #80, d0
+0000000C  4E4F                      32      trap    #15
+0000000E  303C 0051                 33      move.w  #81,d0
+00000012  4E4F                      34      trap    #15
+00000014                            35      
+Line 36 ERROR: Undefined symbol
+00000014  41F9 004DBB8E             36      lea GAME_STATE, a0
+0000001A  1010                      37      move.b  (a0), d0
+Line 38 ERROR: Undefined symbol
+0000001C  0C00 008E                 38      cmpi.b  #GAME_STATE_PLAYING, d0
+00000020  6700 001E                 39      beq     CLEAN_PLAYING_SCREEN
+Line 40 ERROR: Undefined symbol
+00000024  0C00 008E                 40      cmpi.b  #GAME_STATE_PAUSED, d0
+00000028  6700 0038                 41      beq     CLEAN_PAUSE_SCREEN
+Line 42 ERROR: Undefined symbol
+0000002C  0C00 008E                 42      cmpi.b  #GAME_STATE_HI_SCORE, d0
+00000030  6700 0050                 43      beq     CLEAN_HI_SCORE_SCREEN
+00000034                            44      
+00000034                            45      CLEAN_MENU_SCREEN:
+00000034  103C 000B                 46          move.b  #11, d0
+00000038  323C FF00                 47          move.w  #$FF00, d1
+0000003C  4E4F                      48          trap    #15
+0000003E  4E75                      49          rts
+00000040                            50      CLEAN_PLAYING_SCREEN:
+00000040  4E75                      51          rts
+00000042  323C 0000                 52          move.w  #GS_PLAY_TOP_LEFT_X, d1
+00000046  343C 0000                 53          move.w  #GS_PLAY_TOP_LEFT_Y, d2 
+0000004A  363C 00BA                 54          move.w  #GS_PLAY_BOT_RIGHT_X, d3
+0000004E  383C 00F0                 55          move.w  #GS_PLAY_BOT_RIGHT_Y, d4
+00000052                            56          
+00000052  E549                      57          lsl.w   #2, d1
+00000054  E54A                      58          lsl.w   #2, d2
+00000056  E54B                      59          lsl.w   #2, d3
+00000058  E54C                      60          lsl.w   #2, d4
+0000005A  103C 0057                 61          move.b  #87, d0
+0000005E  4E4F                      62          trap    #15
+00000060  4E75                      63          rts
+00000062                            64      CLEAN_PAUSE_SCREEN:
+00000062  323C 0040                 65          move.w  #GS_PAUSE_TOP_LEFT_X, d1
+00000066  343C 003C                 66          move.w  #GS_PAUSE_TOP_LEFT_Y, d2
+0000006A  363C 00C0                 67          move.w  #GS_PAUSE_BOT_RIGHT_X, d3
+0000006E  383C 00B4                 68          move.w  #GS_PAUSE_BOT_RIGHT_Y, d4
+00000072                            69          
+00000072  E549                      70          lsl.w   #2, d1
+00000074  E54A                      71          lsl.w   #2, d2
+00000076  E54B                      72          lsl.w   #2, d3
+00000078  E54C                      73          lsl.w   #2, d4
+0000007A  103C 0057                 74          move.b  #87, d0
+0000007E  4E4F                      75          trap    #15
+00000080  4E75                      76          rts
+00000082                            77      CLEAN_HI_SCORE_SCREEN:
+00000082                            78          ;I'll figure something out here... eventually...
+00000082  4E75                      79          rts
+00000084                            80      
+00000084                            81      
+00000084                            82      
+00000084                            83  UPDATE_SCORE:
+00000084  4E75                      84      rts
+00000086                            85      
+00000086                            86  
+00000086                            87  ;d5 is the position, d6 is the offset, d7 is the size, trap code is already set.
+00000086                            88  
+00000086                            89  
+00000086                            90  DRAW_SCALED_FROM_POSITION:
+00000086  3206                      91      move.w  d6, d1      ;lo x
+00000088  3606                      92      move.w  d6, d3      ;hi x
+0000008A  5343                      93      subi.w  #1, d3
+0000008C  4846                      94      swap.w  d6      
+0000008E  3406                      95      move.w  d6, d2      ;lo y
+00000090  3806                      96      move.w  d6, d4      ;hi y
+00000092  5344                      97      subi.w  #1, d4
+00000094  D647                      98      add.w   d7, d3      ;adding x size
+00000096  4847                      99      swap    d7
+00000098  D847                     100      add.w   d7, d4      ;adding y size
+0000009A  D245                     101      add.w   d5, d1      ;adding offsets
+0000009C  D645                     102      add.w   d5, d3
+0000009E  4845                     103      swap    d5
+000000A0  D445                     104      add.w   d5, d2
+000000A2  D845                     105      add.w   d5, d4
+000000A4  4845                     106      swap    d5
+000000A6  4EB9 000000AE            107      jsr DRAW_SCALED_SHAPE
+000000AC  4E75                     108      rts
+000000AE                           109  
+000000AE                           110  ;d0, d1, d2, d3, and d4 are set. This just multiplies their sizes by the pixel size and puts them in the right spot.
+000000AE                           111  
+000000AE                           112  
+000000AE                           113  
+000000AE                           114  DRAW_SCALED_SHAPE:
+Line 115 ERROR: Undefined symbol
+000000AE  ED89                     115      lsl.l   #PIXEL_SHIFT, d1
+Line 116 ERROR: Undefined symbol
+000000B0  ED8A                     116      lsl.l   #PIXEL_SHIFT, d2 
+Line 117 ERROR: Undefined symbol
+000000B2  ED8B                     117      lsl.l   #PIXEL_SHIFT, d3 
+Line 118 ERROR: Undefined symbol
+000000B4  ED8C                     118      lsl.l   #PIXEL_SHIFT, d4 
+000000B6  4E4F                     119      trap    #15
+000000B8  4E75                     120      rts
+000000BA                           121  
+000000BA                           122  ;a0 is a reference to the object to inval d0-d4 will be used.
+000000BA                           123  INVAL_OBJECT:
+000000BA  7050                     124      move.l  #80, d0
+000000BC  4281                     125      clr.l   d1
+000000BE  4E4F                     126      trap    #15
+000000C0  103C 0051                127      move.b  #81, d0
+000000C4  4E4F                     128      trap    #15
+000000C6                           129          
+000000C6  103C 0057                130      move.b  #87, d0
+000000CA                           131          
+000000CA                           132          
+Line 133 ERROR: Undefined symbol
+000000CA  3428 BB8E                133      move.w  GET_POSITION(a0), d2
+000000CE  3802                     134      move.w  d2, d4
+Line 135 ERROR: Invalid syntax
+000000D0                           135      move.w  (GET_POSITION+2)(a0), d1
+000000D0  3601                     136      move.w  d1, d3
+Line 137 ERROR: Undefined symbol
+000000D2  D868 BB8E                137      add.w   GET_SIZE(a0), d4
+Line 138 ERROR: Invalid syntax
+000000D6                           138      add.w   (GET_SIZE+2)(a0), d3 
+000000D6                           139          
+000000D6  4EB8 00AE                140      jsr DRAW_SCALED_SHAPE
+000000DA  4E75                     141      rts
+000000DC                           142  
+000000DC                           143  ;a0 is the location of the entity in memory, d0 is their new position. with X being the least significant word.
+Line 144 ERROR: Symbol value differs between first and second pass
+000000DC                           144  SET_COLLISION_ZONE:
+Line 145 ERROR: Undefined symbol
+000000DC  2028 BB8E                145      move.l  GET_POSITION(a0), d0
+000000E0  4204                     146      clr.b   d4
+000000E2  4286                     147      clr.l   d6
+000000E4  4285                     148      clr.l   d5
+000000E6  3C00                     149      move.w  d0, d6      ;x
+000000E8  E54E                     150      lsl.w   #2, d6
+000000EA  4840                     151      swap    d0
+000000EC  3A00                     152      move.w  d0, d5      ;y
+000000EE  E54D                     153      lsl.w   #2, d5      
+Line 154 ERROR: Undefined symbol
+000000F0  8CFC BB8E                154      divu    #STAGE_BORDER_X_MAX, d6
+Line 155 ERROR: Undefined symbol
+000000F4  8AFC BB8E                155      divu    #STAGE_BORDER_Y_MAX, d5
+000000F8                           156          
+000000F8  1805                     157      move.b  d5, d4
+000000FA  E50C                     158      lsl.b   #2, d4
+000000FC  D806                     159      add.b  d6, d4    
+Line 160 ERROR: Invalid syntax
+000000FE                           160      move.b  d4, (GET_INFO+1)(a0)
+000000FE  4E75                     161      rts
+00000100                           162      
+Line 163 ERROR: Symbol value differs between first and second pass
+00000100                           163   TEMP_SCALE_X:
+00000100  E54B                     164      lsl.w   #2, d3
+00000102  E549                     165      lsl.w   #2, d1
+00000104  4E4F                     166      trap    #15
+00000106  E44B                     167      lsr.w   #2, d3
+00000108  E449                     168      lsr.w   #2, d1
+0000010A  4E75                     169      rts
+0000010C                           170      
+Line 171 ERROR: Symbol value differs between first and second pass
+0000010C                           171   TEMP_SCALE_Y:
+0000010C  E54A                     172      lsl.w   #2, d2
+0000010E  E54C                     173      lsl.w   #2, d4
+00000110  4E4F                     174      trap    #15
+00000112  E44A                     175      lsr.w   #2, d2
+00000114  E44C                     176      lsr.w   #2, d4
+00000116  4E75                     177      rts
+00000118                           178  
+Line 179 ERROR: Symbol value differs between first and second pass
+00000118                           179  DRAW_GRID_LINES:
+00000118  103C 0050                180      move.b  #80, d0
+0000011C  223C 00808080            181      move.l  #$00808080, d1
+00000122  4E4F                     182      trap    #15
+00000124                           183      
+00000124  103C 0054                184      move.b  #84, d0
+00000128  343C 0000                185      move.w  #0, d2
+Line 186 ERROR: Invalid syntax
+0000012C                           186      move.w  #(STAGE_BORDER_Y_MAX<<2), d4
+0000012C                           187      
+0000012C                           188      
+Line 189 ERROR: Undefined symbol
+0000012C  363C BB8E                189      move.w  #STAGE_BORDER_X_MAX, d3
+00000130                           190      
+00000130                           191     
+00000130                           192      
+00000130                           193      
+00000130  E24B                     194      lsr.w   #1, d3
+00000132  3203                     195      move.w  d3, d1
+00000134                           196      
+00000134  4EB8 010C                197      jsr TEMP_SCALE_X
+00000138                           198      
+00000138  3A03                     199      move.w  d3, d5
+0000013A  E24B                     200      lsr.w   #1, d3
+0000013C  3203                     201      move.w  d3, d1
+0000013E                           202     
+0000013E  4EB8 010C                203      jsr TEMP_SCALE_X
+00000142                           204      
+00000142  D645                     205      add.w   d5, d3
+00000144  3203                     206      move.w  d3, d1
+00000146                           207      
+00000146  4EB8 010C                208      jsr TEMP_SCALE_X
+0000014A                           209      
+0000014A  323C 0000                210      move.w  #0, d1
+Line 211 ERROR: Invalid syntax
+0000014E                           211      move.w  #(STAGE_BORDER_X_MAX<<2), d3
+0000014E                           212      
+Line 213 ERROR: Undefined symbol
+0000014E  383C BB8E                213      move.w  #STAGE_BORDER_Y_MAX, d4
+00000152                           214      
+00000152                           215  
+00000152                           216      
+00000152  E24C                     217      lsr.w   #1, d4
+00000154  3404                     218      move.w  d4, d2
+00000156  4EB8 0118                219      jsr TEMP_SCALE_Y
+0000015A                           220      
+0000015A  3A04                     221      move.w  d4, d5
+0000015C  E24C                     222      lsr.w   #1, d4
+0000015E  3404                     223      move.w  d4, d2
+00000160                           224      
+00000160  4EB8 0118                225      jsr TEMP_SCALE_Y
+00000164                           226      
+00000164  D845                     227      add.w   d5, d4
+00000166  3404                     228      move.w  d4, d2
+00000168  4EB8 0118                229      jsr TEMP_SCALE_Y
+0000016C  4E75                     230      rts
+0000016E                           231      
+0000016E                           232      
+0000016E                           233      
+Line 234 ERROR: Symbol value differs between first and second pass
+0000016E                           234  UPDATE_DELTA_TIME:
+Line 235 ERROR: Undefined symbol
+0000016E  41F9 004DBB8E            235      lea     TIME_LAST_UPDATE, a0
+Line 236 ERROR: Undefined symbol
+00000174  43F9 004DBB8E            236      lea     DELTA_TIME, a1
+0000017A  2410                     237      move.l  (a0), d2        ;storing old time, and subracting it from new time.
+0000017C  103C 0008                238      move.b  #8, d0
+00000180  4E4F                     239      trap    #15
+00000182  2081                     240      move.l  d1, (a0)
+00000184  9282                     241      sub.l   d2, d1
+00000186  2281                     242      move.l  d1, (a1)
+00000188  4E75                     243      rts
+0000018A                           244      
+0000018A                           245       
+Line 246 WARNING: END directive missing, starting address not set
+
+27 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CLEAN_HI_SCORE_SCREEN  82
+CLEAN_MENU_SCREEN   34
+CLEAN_PAUSE_SCREEN  62
+CLEAN_PLAYING_SCREEN  40
+CLEAN_SCREEN        0
+DRAW_GRID_LINES     124
+DRAW_SCALED_FROM_POSITION  86
+DRAW_SCALED_SHAPE   AE
+GS_PAUSE_BOT_RIGHT_X  C0
+GS_PAUSE_BOT_RIGHT_Y  B4
+GS_PAUSE_TOP_LEFT_X  40
+GS_PAUSE_TOP_LEFT_Y  3C
+GS_PLAY_BOT_RIGHT_X  BA
+GS_PLAY_BOT_RIGHT_Y  F0
+GS_PLAY_TOP_LEFT_X  0
+GS_PLAY_TOP_LEFT_Y  0
+INVAL_OBJECT        BA
+SET_COLLISION_ZONE  E4
+TEMP_SCALE_X        10C
+TEMP_SCALE_Y        118
+UPDATE_DELTA_TIME   182
+UPDATE_SCORE        84

@@ -1,0 +1,309 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 6/28/2023 3:32:29 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Bitmap Subroutine
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  
+00000000                             7  * In this exercise, you will create a subroutine that can display
+00000000                             8  *   a chunk of a .bmp file. The arguments required for your subroutine are:
+00000000                             9  *   - Pointer to .bmp file (NOT a pointer to the pixel data)
+00000000                            10  *   - Top, Left corner (x,y) of the bitmap chunk you want to display
+00000000                            11  *   - Width and Height of the bitmap chunk you want to display
+00000000                            12  *   - Top, Left corner (x,y) on the output screen to display your chunk
+00000000                            13  * You will need to handle 24-bit and 32-bit bitmaps
+00000000                            14  *debug if not bitmap
+00000000                            15  * edge cases (not a file)
+00000000                            16  *-----------------------------------------------------------
+00000000                            17      
+00000000  =00000000                 18  TLCBMP_X   EQU     0
+00000000  =00000000                 19  TLCBMP_Y   EQU     0
+00000000  =00000010                 20  WIDTH   EQU     16
+00000000  =00000010                 21  HEIGHT  EQU     16
+00000000  =00000064                 22  TLCIOX  EQU     100
+00000000  =00000000                 23  TLCIOY  EQU     0
+00000000                            24  
+00000000                            25    
+00000000                            26  
+00001000                            27      ORG    $1000
+00001000                            28  START:                  
+00001000                            29      
+00001000                            30  
+00001000                            31      
+00001000  323C 03E8                 32      move.w  #1000, d1
+00001004  4841                      33      swap    d1
+00001006  323C 03E8                 34      move.w  #1000, d1
+0000100A  303C 0021                 35      move.w  #33, d0
+0000100E  4E4F                      36      trap    #15
+00001010  4280                      37      clr.l   d0
+00001012  4281                      38      clr.l   d1
+00001014                            39      
+00001014  3A3C 0000                 40      move.w  #TLCBMP_Y, d5
+00001018  4845                      41      swap    d5
+0000101A  3A3C 0000                 42      move.w  #TLCBMP_X, d5
+0000101E                            43      
+0000101E  3C3C 0010                 44      move.w  #HEIGHT, d6  
+00001022  4846                      45      swap    d6
+00001024  3C3C 0010                 46      move.w  #WIDTH , d6
+00001028                            47      
+00001028  3E3C 0000                 48      move.w  #TLCIOY, d7
+0000102C  4847                      49      swap    d7
+0000102E  3E3C 0064                 50      move.w  #TLCIOX, d7
+00001032                            51      
+00001032                            52  
+00001032  4EB9 0000103C             53      jsr DisplayBMPData
+00001038                            54  
+00001038                            55  
+00001038  FFFF FFFF                 56      SIMHALT             ; halt simulator
+0000103C                            57      
+0000103C                            58        ;Pointer to bmp file is already handled
+0000103C                            59      ;d5 = top left corner of bitmap X and Y is gonna be handled by d1. Most significant bytes are the X, least significant bytes are the Y
+0000103C                            60          ;Potential checks: Make sure that X and Y are within the bounds of the picture
+0000103C                            61      ;d6 = Width and height of bitmap chunk to display will be handled by d2. Most significant bytes are X, least significant bytes are Y
+0000103C                            62          ;potential checks: Make sure that X and Y + corners doesn't take you out of the image. If it does, throw an error
+0000103C                            63      ;d7 = top left corner of hte output screen to display chunk. will be in d3
+0000103C                            64          ;In the event that the screen is too small, resize it(?)
+0000103C                            65          
+0000103C                            66          
+0000103C                            67      ;AFTER CODE
+0000103C                            68          
+0000103C                            69          
+0000103C                            70          
+0000103C                            71  
+0000103C                            72  DisplayBMPData:
+0000103C                            73  
+0000103C                            74  
+0000103C                            75     ValidBMP:
+0000103C                            76          ;LSB in d4 will be set based on the status of the display.
+0000103C                            77              ;0 = no errors
+0000103C                            78              ;1 = invalid bmp file/not a bmp file
+0000103C                            79              ;2 = topleft corner of bmp is invalid
+0000103C                            80              ;3 = Width and height of d2 is invalid
+0000103C                            81              ;4 = this is not a 24 or 32-bit bitmap.
+0000103C                            82              ;if LSB is not 0 by the end of this, go to RestoreRegisters.
+0000103C                            83                  ;Nothing will be displayed and our "error flag" will be set,
+0000103C                            84                  ;to be parsed outside the subroutine
+0000103C                            85      
+0000103C                            86      
+0000103C                            87      
+0000103C                            88      ;Loading in the width Backup and the "whattoadd"
+0000103C  41F9 00001166             89      lea BITMAP, a0              
+00001042  1628 000A                 90      move.b 10(a0), d3           ;Saving start offset into d3
+00001046                            91      
+00001046  1828 001C                 92      move.b  $1C(a0), d4
+0000104A                            93      
+0000104A  43F9 00001164             94      lea END_LINE_ADD, a1
+00001050                            95  
+00001050                            96      
+00001050  1428 0013                 97      move.b  $13(a0),d2   ;pic width
+00001054  E14A                      98      lsl.w   #8, d2
+00001056  1428 0012                 99      move.b  $12(a0),d2
+0000105A                           100      
+0000105A  D446                     101      add.w  d6, d2       ;picwidth + chunkwidth
+0000105C  E58A                     102      lsl.l   #2, d2
+0000105E  0C04 0020                103      cmpi.b  #32, d4
+00001062                           104  
+00001062  6700 000A                105      beq DONTCHANGEENDLINE
+00001066  E48A                     106      lsr.l   #2, d2
+00001068  2202                     107      move.l  d2, d1
+0000106A  D481                     108      add.l   d1, d2
+0000106C  D481                     109      add.l   d1, d2
+0000106E                           110      
+0000106E                           111      
+0000106E                           112      DONTCHANGEENDLINE:
+0000106E                           113      
+0000106E                           114      
+0000106E  3282                     115      move.w  d2, (a1)    ;END_LINE_ADD has what to add/subtract at the end/beginning of a line respectively
+00001070  45F9 00001162            116      lea WIDTH_BACKUP, a2
+00001076  3486                     117      move.w  d6, (a2)
+00001078  DD52                     118      add.w   d6, (a2)
+0000107A  DD52                     119      add.w   d6, (a2)
+0000107C  DD52                     120      add.w   d6, (a2)
+0000107E                           121      
+0000107E                           122      ;Height measurements in LSW d5 and d6
+0000107E                           123      
+0000107E  4242                     124      clr.w   d2
+00001080  1428 0013                125      move.b  $13(a0),d2   ;pic width
+00001084  E14A                     126      lsl.w   #8, d2
+00001086  1428 0012                127      move.b  $12(a0),d2
+0000108A                           128          
+0000108A  1228 0017                129      move.b  $17(a0),d1   ;pic height
+0000108E  E149                     130      lsl.w   #8, d1
+00001090  1228 0016                131      move.b  $16(a0),d1
+00001094                           132      
+00001094                           133      ;to get starting position, you need to get:
+00001094                           134      ;4((TLC.y + height)*totalwidth + (TLC.x + chunkWidth))  OR 3x
+00001094                           135  
+00001094  4845                     136      swap    d5
+00001096  4846                     137      swap    d6
+00001098  4280                     138      clr.l   d0
+0000109A                           139      
+0000109A  3001                     140      move.w  d1, d0
+0000109C  9046                     141      sub.w  d6, d0                          
+0000109E  9045                     142      sub.w   d5, d0      
+000010A0                           143      ;subi.w  #1, d0
+000010A0  C0C2                     144      mulu.w  d2, d0      ;Image is stored as bottom left = 0,0
+000010A2  4845                     145      swap    d5
+000010A4  4846                     146      swap    d6
+000010A6  4281                     147      clr.l   d1
+000010A8                           148  
+000010A8  3206                     149      move.w  d6, d1
+000010AA  D081                     150      add.l   d1, d0
+000010AC  3205                     151      move.w  d5, d1
+000010AE  D081                     152      add.l   d1, d0 
+000010B0                           153  
+000010B0  E588                     154      lsl.l   #2, d0      ;d0 is now 4((TLC.y + height)*totalwidth + (TLC.x + chunkWidth)) 
+000010B2                           155      
+000010B2                           156      
+000010B2  0C04 0020                157      cmpi.b  #32, d4     ;if 24 bit, then don't change the value in d0. otherwise, redo the change and multiply by 3.
+000010B6  6700 000A                158      beq     DONTCHANGE
+000010BA  E488                     159      lsr.l   #2, d0
+000010BC  2200                     160      move.l  d0, d1
+000010BE  D081                     161      add.l   d1, d0
+000010C0  D081                     162      add.l   d1, d0
+000010C2                           163      
+000010C2                           164      DONTCHANGE:
+000010C2  D083                     165      add.l   d3, d0
+000010C4  D1C0                     166      adda.l  d0, a0   
+000010C6                           167  
+000010C6  E54E                     168      lsl.w   #2, d6
+000010C8  4846                     169      swap    d6
+000010CA  E54E                     170      lsl.w   #2, d6                  ;Width related stuff in LSW d5 and d6
+000010CC  4281                     171      clr.l   d1
+000010CE  0C04 0020                172      cmpi.b  #32, d4
+000010D2  6700 004E                173      beq     OUTERLOOP32 
+000010D6                           174  
+000010D6                           175   
+000010D6                           176      DisplayBitmap:
+000010D6                           177          ;Displaying a 24 bit bitmap. Separated for speed. Instead of doing a cmp and beq call every pixel drawn, do it once and instead make this large. They use the same code anyways.
+000010D6                           178          OUTERLOOP24:
+000010D6  4846                     179          swap    d6
+000010D8                           180              INNERLOOP24:
+000010D8  4281                     181              clr.l   d1
+000010DA  5788                     182              suba.l  #3, a0
+000010DC  1210                     183              move.b  (a0), d1
+000010DE  E189                     184              lsl.l   #8, d1
+000010E0  1228 0001                185              move.b  1(a0), d1
+000010E4  E189                     186              lsl.l   #8, d1
+000010E6  1228 0002                187              move.b  2(a0), d1
+000010EA                           188              
+000010EA                           189              
+000010EA  7050                     190              move.l  #80, d0
+000010EC  4E4F                     191              trap    #15
+000010EE  7051                     192              move.l  #81, d0
+000010F0  4E4F                     193              trap    #15
+000010F2                           194                                          ; DRAWRECTANGLE:
+000010F2  303C 0057                195              move.w  #87, d0             ; Drawing rectangles instead of pixels
+000010F6  3207                     196              move.w  d7, d1
+000010F8  4847                     197              swap    d7
+000010FA  3407                     198              move.w  d7, d2
+000010FC  4847                     199              swap    d7
+000010FE  D246                     200              add.w   d6, d1
+00001100  4846                     201              swap    d6
+00001102  D446                     202              add.w   d6, d2
+00001104  4846                     203              swap    d6
+00001106  3601                     204              move.w  d1, d3
+00001108  5941                     205              subi.w  #4, d1
+0000110A  3802                     206              move.w  d2, d4
+0000110C  5942                     207              subi.w  #4, d2
+0000110E  4E4F                     208              trap    #15
+00001110                           209              
+00001110                           210              
+00001110  5946                     211              subi.w  #4, d6          ;sub from x. 
+00001112  6EC4                     212              bgt     INNERLOOP24
+00001114                           213          
+00001114  D0D1                     214          adda.w  (a1), a0                ;must account for dead space.
+00001116  DC52                     215          add.w   (a2), d6
+00001118                           216          
+00001118  4846                     217          swap    d6
+0000111A  5946                     218          subi.w  #4, d6
+0000111C  6EB8                     219          bgt OUTERLOOP24
+0000111E  6000 0040                220          bra RESTOREREGISTERS
+00001122                           221      
+00001122                           222      
+00001122                           223          OUTERLOOP32:
+00001122  4846                     224          swap    d6
+00001124                           225              INNERLOOP32:
+00001124  303C 0050                226              move.w  #80, d0
+00001128  2220                     227              move.l  -(a0), d1
+0000112A  E089                     228              lsr.l   #8, d1
+0000112C                           229  
+0000112C  4E4F                     230              trap    #15
+0000112E  303C 0051                231              move.w  #81, d0
+00001132  4E4F                     232              trap    #15
+00001134                           233              
+00001134  303C 0057                234              move.w  #87, d0             ;Drawing rectangles instead of pixels
+00001138  3207                     235              move.w  d7, d1
+0000113A  4847                     236              swap    d7
+0000113C  3407                     237              move.w  d7, d2
+0000113E  4847                     238              swap    d7
+00001140  D246                     239              add.w   d6, d1
+00001142  4846                     240              swap    d6
+00001144  D446                     241              add.w   d6, d2
+00001146  4846                     242              swap    d6
+00001148                           243              
+00001148  3601                     244              move.w  d1, d3
+0000114A  5843                     245              addi.w  #4, d3
+0000114C  3802                     246              move.w  d2, d4
+0000114E  5844                     247              addi.w  #4, d4
+00001150  4E4F                     248              trap    #15
+00001152                           249              
+00001152                           250              
+00001152  5946                     251              subi.w  #4, d6          ;sub from x. 
+00001154  66CE                     252              bne     INNERLOOP32
+00001156                           253          
+00001156  D0D1                     254          adda.w  (a1), a0                ;must account for dead space.
+00001158  DC52                     255          add.w   (a2), d6
+0000115A  4846                     256          swap    d6
+0000115C  5946                     257          subi.w  #4, d6
+0000115E  66C2                     258          bne OUTERLOOP32
+00001160                           259      RESTOREREGISTERS:
+00001160                           260          ;Moves values from the stack / an address back to registers
+00001160                           261          ;increments the stack pointer back
+00001160                           262          ;DO NOT SET D0 HERE.    
+00001160  4E75                     263      rts
+00001162                           264      
+00001162                           265  
+00001162                           266  * Put variables and constants here
+00001162                           267  
+00001162                           268  WIDTH_BACKUP            ds.w    1
+00001164                           269  END_LINE_ADD            ds.w    1
+00001166                           270  
+00001166                           271  BITMAP      INCBIN      'slime.bmp'
+000015F0                           272  EOF
+000015F0                           273      
+000015F0                           274      
+000015F0                           275  
+000015F0                           276      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BITMAP              1166
+DISPLAYBITMAP       10D6
+DISPLAYBMPDATA      103C
+DONTCHANGE          10C2
+DONTCHANGEENDLINE   106E
+END_LINE_ADD        1164
+EOF                 15F0
+HEIGHT              10
+INNERLOOP24         10D8
+INNERLOOP32         1124
+OUTERLOOP24         10D6
+OUTERLOOP32         1122
+RESTOREREGISTERS    1160
+START               1000
+TLCBMP_X            0
+TLCBMP_Y            0
+TLCIOX              64
+TLCIOY              0
+VALIDBMP            103C
+WIDTH               10
+WIDTH_BACKUP        1162

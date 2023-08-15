@@ -1,0 +1,293 @@
+00059D82 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 7/7/2023 10:49:46 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Collision
+00000000                             3  * Written by : Anthony Pizzigoni
+00000000                             4  * Date       : 6-30-23
+00000000                             5  * Description: Handles what everything does on collision. Has a collision handling table.
+00000000                             6  *-----------------------------------------------------------
+00000000                             7   
+00000000                             8      ;COLLISION CHALLENGES:
+00000000                             9      ;   * Backup as few registers as humanly possible. This will be called super often, so less memory reads is better.
+00000000                            10      ;   * Optimize checks to be as fast as possible. The faster collision is, the better.
+00000000                            11      ;       *   less outer loops = better. Try to set it so the thing with the least objects will be in d0/a0 and the most in d1/a1.
+00000000                            12      
+00000000                            13      HANDLE_COLLISION:
+00000000                            14          ;PLAYER_BULLETS <==> ENEMIES.
+00000000                            15       
+Line 16 ERROR: Undefined symbol
+00000000  41F9 004DBD16             16          lea     ET_PLAYER_BULLETS_START, a0
+Line 17 ERROR: Undefined symbol
+00000006  43F9 004DBD16             17          lea     ET_ENEMIES_START, a1
+Line 18 ERROR: Undefined symbol
+0000000C  203C 004DBD16             18          move.l  #MAX_NUM_PLAYER_BULLETS, d0
+Line 19 ERROR: Undefined symbol
+00000012  223C 004DBD16             19          move.l  #MAX_NUM_ENEMIES, d1
+00000018  4EB9 0000009E             20          jsr COLLISION_LAYER_CHECKS
+0000001E                            21          
+0000001E                            22          ;ENEMIES <==> PLAYERS
+Line 23 ERROR: Undefined symbol
+0000001E  43F9 004DBD16             23          lea     ET_ENEMIES_START, a1
+Line 24 ERROR: Undefined symbol
+00000024  41F9 004DBD16             24          lea     ET_PLAYER_START, a0
+Line 25 ERROR: Undefined symbol
+0000002A  223C 004DBD16             25          move.l  #MAX_NUM_ENEMIES, d1
+Line 26 ERROR: Undefined symbol
+00000030  203C 004DBD16             26          move.l  #MAX_NUM_PLAYERS, d0
+00000036  4EB9 0000009E             27          jsr COLLISION_LAYER_CHECKS
+0000003C                            28          
+0000003C                            29          ;PLAYERS <==> ENEMY BULLETS
+Line 30 ERROR: Undefined symbol
+0000003C  43F9 004DBD16             30          lea     ET_ENEMY_BULLETS_START, a1
+Line 31 ERROR: Undefined symbol
+00000042  41F9 004DBD16             31          lea     ET_PLAYER_START, a0
+Line 32 ERROR: Undefined symbol
+00000048  223C 004DBD16             32          move.l  #MAX_NUM_ENEMY_BULLETS, d1
+Line 33 ERROR: Undefined symbol
+0000004E  203C 004DBD16             33          move.l  #MAX_NUM_PLAYERS, d0
+00000054  4EB9 0000009E             34          jsr COLLISION_LAYER_CHECKS
+0000005A                            35  
+0000005A                            36      
+0000005A                            37          ;PLAYER_SWORD <==> ENEMIES & ENEMY_BULLETS
+Line 38 ERROR: Undefined symbol
+0000005A  41F9 004DBD16             38          lea     ET_PLAYER_SWORD_START, a0
+Line 39 ERROR: Undefined symbol
+00000060  43F9 004DBD16             39          lea     ET_ENEMIES_START, a1
+Line 40 ERROR: Undefined symbol
+00000066  203C 004DBD16             40          move.l  #MAX_NUM_PLAYER_SWORD, d0 
+Line 41 ERROR: Undefined symbol
+0000006C  223C 004DBD16             41          move.l  #MAX_NUM_ENEMIES, d1
+Line 42 ERROR: Undefined symbol
+00000072  0681 004DBD16             42          add.l   #MAX_NUM_ENEMY_BULLETS, d1   ;In memory, they are right next to each other, so for now, this is a small optimization that can be made.
+00000078  4EB9 0000009E             43          jsr COLLISION_LAYER_CHECKS          
+0000007E                            44          
+0000007E                            45          ;PICKUPS <==> PLAYER
+Line 46 ERROR: Undefined symbol
+0000007E  43F9 004DBD16             46          lea     ET_PICKUPS_START, a1
+Line 47 ERROR: Undefined symbol
+00000084  41F9 004DBD16             47          lea     ET_PLAYER_START, a0
+Line 48 ERROR: Undefined symbol
+0000008A  223C 004DBD16             48          move.l  #MAX_NUM_PICKUPS, d1
+Line 49 ERROR: Undefined symbol
+00000090  203C 004DBD16             49          move.l  #MAX_NUM_PLAYERS, d0
+00000096  4EB9 0000009E             50          jsr COLLISION_LAYER_CHECKS
+0000009C  4E75                      51          rts
+0000009E                            52          
+0000009E                            53          
+0000009E                            54          
+0000009E                            55      ;a0 is the index of the checker layer (checker layer)
+0000009E                            56      ;d0 is the number of loops for a0 - 1
+0000009E                            57      ;a1 is the index the collisions
+0000009E                            58      ;d1 is the number of loops for a1 - 1.  
+0000009E                            59          
+0000009E                            60          
+0000009E                            61      COLLISION_LAYER_CHECKS:
+0000009E                            62  
+0000009E  5340                      63          subi.w  #1, d0              ;subtracting 1 to account for 0 indexing.
+000000A0  5341                      64          subi.w  #1, d1   
+000000A2  4840                      65          swap    d0
+000000A4  3001                      66          move.w  d1, d0
+000000A6  4840                      67          swap    d0      
+000000A8                            68  
+000000A8  EB88                      69          lsl.l   #5, d0      
+000000AA  EB49                      70          lsl.w   #5, d1                  
+000000AC                            71          ;backing up inner loop max value in d0. Need an extra register, and keeping d7 open for returns.
+000000AC                            72          ;Ideally, collision checks should not back anything up because they will be called so much every single frame.
+000000AC  45F9 00000176             73          lea CLOSE_COLLISION_TABLE, a2    
+000000B2                            74          CC_PB_OUTER_LOOP:
+Line 75 ERROR: Undefined symbol
+000000B2  1430 0016                 75              move.b  (GET_INFO,a0, d0), d2         ;d2 holds player bullet info
+000000B6  6700 0042                 76              beq     ITERATE_OUT
+000000BA                            77              CC_PB_INNER_LOOP:
+Line 78 ERROR: Undefined symbol
+000000BA  1631 1016                 78                  move.b  GET_INFO(a1,d1), d3     ;d3 holds enemy info
+000000BE  6700 0034                 79                  beq     ITERATE_IN
+000000C2                            80                                                  ;at this point, both bullet and enemy are active and we do a collision check.
+Line 81 ERROR: Invalid syntax
+000000C2                            81                  move.b  (GET_INFO+1,a0, d0), d2    ;Getting collision quadrant
+000000C2  4882                      82                  ext.w   d2
+Line 83 ERROR: Invalid syntax
+000000C4                            83                  move.b  (GET_INFO+1,a1,d1), d3   ;Getting collision quadrant  
+000000C4  4883                      84                  ext.w   d3  
+000000C6  E34A                      85                  lsl.w   #1, d2
+000000C8  3832 2000                 86                  move.w  (a2, d2), d4
+000000CC  0704                      87                  btst  d3, d4
+000000CE  6700 0024                 88                  beq     ITERATE_IN              ;if the bit is not set, there is no collision check.
+000000D2  2F00                      89                  move.l  d0, -(SP)
+000000D4  2F01                      90                  move.l  d1, -(SP)
+000000D6  2F02                      91                  move.l  d2, -(SP)
+000000D8  2F08                      92                  move.l  a0, -(SP)
+000000DA  2F09                      93                  move.l  a1, -(SP)
+000000DC  4EB9 00000108             94                  jsr COLLISION_BOX_OVERLAP
+000000E2  2EC9                      95                  move.l  a1, (SP)+
+000000E4  2EC8                      96                  move.l  a0, (SP)+
+000000E6  2EC2                      97                  move.l  d2, (SP)+
+000000E8  2EC1                      98                  move.l  d1, (SP)+
+000000EA  2EC0                      99                  move.l  d0, (SP)+
+Line 100 ERROR: Symbol value differs between first and second pass
+000000EC                           100                  ITERATE_IN:
+Line 101 ERROR: Undefined symbol
+000000EC  0441 BD16                101                  subi.w  #ENTITY_SIZE, d1
+000000F0  6CC8                     102                  bge     CC_PB_INNER_LOOP
+000000F2                           103              
+Line 104 ERROR: Symbol value differs between first and second pass
+000000F2                           104              ITERATE_OUT:
+000000F2  4840                     105              swap    d0
+000000F4  3200                     106              move.w  d0, d1
+000000F6  4840                     107              swap    d0
+Line 108 ERROR: Undefined symbol
+000000F8  0440 BD16                108              subi.w  #ENTITY_SIZE, d0
+000000FC  6CB4                     109              bge     CC_PB_OUTER_LOOP
+000000FE  4E75                     110          rts
+00000100                           111  
+00000100                           112      ;arguments are in a0, d0, a1, and d1.
+00000100                           113      ;(a0, d0) is the location of 1 object's data,
+00000100                           114      ;(a1, d1) is the location of another object's data.
+00000100                           115      ;return value in d7.b. $FF = there was a collision, $00 = there was no collision
+00000100                           116      
+Line 117 ERROR: Symbol value differs between first and second pass
+00000100                           117      COLLISION_BOX_OVERLAP:
+00000100                           118          ;Gets the top left corner of object, adds the Top Left Collision Box offset to them to get where the collision box starts.
+00000100                           119          
+Line 120 ERROR: Undefined symbol
+00000100  2430 0016                120          move.l  (GET_POSITION,a0,d0),d2
+Line 121 ERROR: Undefined symbol
+00000104  2631 1016                121          move.l  (GET_POSITION,a1,d1),d3
+Line 122 ERROR: Undefined symbol
+00000108  2830 0016                122          move.l  GET_COLLISION_BOX_TL(a0,d0),d4
+0000010C                           123          
+0000010C  D444                     124          add.w   d4, d2
+0000010E  4842                     125          swap    d2
+00000110  4844                     126          swap    d4
+00000112  D444                     127          add.w   d4, d2
+00000114                           128          
+Line 129 ERROR: Undefined symbol
+00000114  2831 1016                129          move.l  GET_COLLISION_BOX_TL(a1,d1),d4
+00000118  D644                     130          add.w   d4, d3
+0000011A  4843                     131          swap    d3
+0000011C  4844                     132          swap    d4
+0000011E  D644                     133          add.w   d4, d3
+00000120                           134          
+Line 135 ERROR: Invalid syntax
+00000120                           135          move.b  (GET_COLLISION_BOX_BOUNDS+1,a0, d0), d4             ;Y first, then X
+00000120                           136          
+00000120                           137          
+00000120  4844                     138          swap    d4
+Line 139 ERROR: Undefined symbol
+00000122  1830 0016                139          move.b  (GET_COLLISION_BOX_BOUNDS,a0,d0),d4
+00000126                           140          
+Line 141 ERROR: Invalid syntax
+00000126                           141          move.b  (GET_COLLISION_BOX_BOUNDS+1,a1, d1), d5
+00000126  4845                     142          swap    d5
+Line 143 ERROR: Undefined symbol
+00000128  1A31 1016                143          move.b  (GET_COLLISION_BOX_BOUNDS,a1, d1), d5
+0000012C                           144          ;d2 and d3 are set as XY right now. Collision box bounds are stored as YX, now at XY.
+0000012C                           145          ;TL Corners in d2 and d3, and their bounds are in d4 and d5 respectively.
+0000012C                           146          ;top left corner of object 1 y + height                  
+0000012C  3C02                     147          move.w  d2, d6
+0000012E  DC44                     148          add.w   d4, d6 
+00000130  BC43                     149          cmp.w   d3, d6          ;if object2.y < object1.y + height, don't branch
+00000132  6D00 0040                150          blt     NO_COLLISION
+00000136                           151          
+00000136  3C03                     152          move.w  d3, d6
+00000138  DC45                     153          add.w   d5, d6
+0000013A  BC42                     154          cmp.w   d2, d6
+0000013C  6D00 0036                155          blt     NO_COLLISION    ;if object1.y < object2.y + height, don't branch
+00000140                           156          
+00000140  4842                     157          swap    d2
+00000142  4843                     158          swap    d3
+00000144  4844                     159          swap    d4
+00000146  4845                     160          swap    d5
+00000148                           161          
+00000148  3C02                     162          move.w  d2, d6
+0000014A  DC44                     163          add.w   d4, d6
+0000014C  BC42                     164          cmp.w   d2, d6
+0000014E  6D00 0024                165          blt     NO_COLLISION    ;if object2.x < object1.x + width, don't branch
+00000152                           166          
+00000152  3C03                     167          move.w  d3, d6
+00000154  DC45                     168          add.w   d5, d6
+00000156  BC42                     169          cmp.w   d2, d6
+00000158  6D00 001A                170          blt     NO_COLLISION    ;if object1.x < object2.x + width, don't branch
+0000015C                           171          
+Line 172 ERROR: Symbol value differs between first and second pass
+0000015C                           172          COLLISION:
+Line 173 ERROR: Undefined symbol
+0000015C  4EB9 004DBD16            173          jsr ON_COLLISION
+00000162  4E75                     174          rts
+00000164                           175          
+Line 176 ERROR: Symbol value differs between first and second pass
+00000164                           176          NO_COLLISION:
+00000164  4E75                     177          rts
+00000166                           178          
+00000166                           179  *                   COLLISION
+00000166                           180  *
+00000166                           181  *    Collision blocks are set up as such:
+00000166                           182  *    
+00000166                           183  *    0   1   2   3
+00000166                           184  *    4   5   6   7
+00000166                           185  *    8   9   A   B
+00000166                           186  *    C   D   E   F
+00000166                           187  *
+00000166                           188  *    The word offset in CLOSE_COLLISION_TABLE is the 1/16 screen space block that an object's top left is in
+00000166                           189  *    the bit offset is the 1/16 screen space block that the other object's top left is in.
+00000166                           190  *
+00000166                           191  *    So, for example, I want to see if an object in block 8 collided with an object in block D, you would go to word offset 8 ($3330 is stored there).
+00000166                           192  *    
+00000166                           193  *                                             FEDC   BA98    7654    3210
+00000166                           194  *                                               v
+00000166                           195  *    Next, you would do a btst check using D (0011   0011    0011    0000)
+00000166                           196  *    
+00000166                           197  *    That bit is set, which means that a collision *could* happen here, so you should run a collision check.
+00000166                           198  
+00000166                           199  
+Line 200 ERROR: Symbol value differs between first and second pass
+00000166                           200  CLOSE_COLLISION_TABLE:     
+00000166= 0033                     201      dc.w   $0033    ;0
+00000168= 0077                     202      dc.w   $0077    ;1
+0000016A= 00EE                     203      dc.w   $00EE    ;2
+0000016C= 00CC                     204      dc.w   $00CC    ;3
+0000016E= 0333                     205      dc.w   $0333    ;4
+00000170= 0777                     206      dc.w   $0777    ;5
+00000172= 0EEE                     207      dc.w   $0EEE    ;6
+00000174= 0CCC                     208      dc.w   $0CCC    ;7
+00000176= 3330                     209      dc.w   $3330    ;8
+00000178= 7770                     210      dc.w   $7770    ;9
+0000017A= EEE0                     211      dc.w   $EEE0    ;A
+0000017C= CCC0                     212      dc.w   $CCC0    ;B
+0000017E= 3300                     213      dc.w   $3300    ;C
+00000180= 7700                     214      dc.w   $7700    ;D
+00000182= EE00                     215      dc.w   $EE00    ;E
+00000184= CC00                     216      dc.w   $CC00    ;F
+00000186                           217  
+00000186                           218  ;All function pointers
+00000186                           219  
+00000186                           220  
+00000186                           221  
+00000186                           222  
+00000186                           223  
+00000186                           224  
+00000186                           225  
+00000186                           226  
+00000186                           227  
+00000186                           228  
+Line 229 WARNING: END directive missing, starting address not set
+
+42 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CC_PB_INNER_LOOP    BA
+CC_PB_OUTER_LOOP    B2
+CLOSE_COLLISION_TABLE  176
+COLLISION           16C
+COLLISION_BOX_OVERLAP  108
+COLLISION_LAYER_CHECKS  9E
+HANDLE_COLLISION    0
+ITERATE_IN          F4
+ITERATE_OUT         FA
+NO_COLLISION        174

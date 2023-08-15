@@ -1,0 +1,155 @@
+0005C84A Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 7/24/2023 3:59:05 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Timer
+00000000                             3  * Written by : Anthony Pizzigoni
+00000000                             4  * Date       : 6-29-23
+00000000                             5  * Description: Handles timers
+00000000                             6  *
+00000000                             7  *
+00000000                             8  *NOTE: If the game begins to hang for zero reasons and it has to do with timers,
+00000000                             9  *it is because callilng a timer when all are filled causes an infinite loop will occur.
+00000000                            10  *
+00000000                            11  *Implementd as such because it is fast, easy to read, easy to understand, and if timers are being overwritten, then I would need to know IMMEDIATELY.
+00000000                            12  *-----------------------------------------------------------
+00000000                            13  
+00000000                            14  
+00000000                            15  ;Each timer is gonna be in seconds
+00000000                            16  
+00000000                            17  
+00000000                            18  
+00000000  =00000096                 19  NUM_TIMERS       EQU     150
+00000000                            20  
+00000000  =00000010                 21  TIMER_SIZE      EQU     16
+00000000                            22  
+00000000  =00000000                 23  GET_TIME_REMAINING   EQU    0           ;lw
+00000000  =00000004                 24  GET_FUNCTION_ADDR    EQU    4            ;lw
+00000000  =00000008                 25  GET_FUNC_INPUT_1     EQU    8           ;2 lws
+00000000  =0000000C                 26  GET_FUNC_INPUT_2     EQU    12
+00000000                            27      
+00000000                            28  ;4 SP = Value to put in timer
+00000000                            29  ;8 SP = Function Address
+00000000                            30  ;12 SP = Function Input 1
+00000000                            31  ;16 SP = Function Input 2
+00000000                            32  SET_TIMER:
+00000000                            33  
+00000000  202F 0004                 34      move.l  4(SP), d0
+00000004  6600 0018                 35      bne     NOT_INSTANT_TIMER
+00000008                            36      
+00000008                            37      ;in the event that the timer is 0, call the function instantly.
+00000008                            38      
+00000008  202F 0010                 39      move.l  16(SP), d0
+0000000C  222F 000C                 40      move.l  12(SP), d1
+00000010  206F 0008                 41      move.l  8(SP), a0
+00000014  2F00                      42      move.l  d0, -(SP)
+00000016  2F01                      43      move.l  d1, -(SP)
+00000018  4E90                      44      jsr     (a0)
+0000001A  508F                      45      adda.l  #8, SP  
+0000001C  4E75                      46      rts
+0000001E                            47      
+0000001E                            48      NOT_INSTANT_TIMER:
+0000001E  41F9 000000BC             49      lea CURR_TIMER, a0
+00000024  2010                      50      move.l  (a0), d0
+00000026  E988                      51      lsl.l   #4, d0                                  ;getting the offset based on CurrTimer and size of a timer.
+00000028  43F9 000000C0             52      lea ALL_TIMERS, a1
+0000002E                            53      IS_IT_EMPTY:
+0000002E  2231 0000                 54      move.l  (GET_TIME_REMAINING, a1,d0), d1         ;if the time remaining is <= 0, then that timer is no longer in use.
+00000032  6F00 0014                 55      ble MOVE_VALUES
+00000036                            56      
+00000036                            57      ;subtract 
+00000036  0480 00000010             58      subi.l  #TIMER_SIZE, d0                         
+0000003C  6CF0                      59      bge IS_IT_EMPTY
+0000003E  0680 00000960             60      addi.l  #(NUM_TIMERS<<4), d0                    ;going to be called when d0 is at "index -1", and adding the total length to hit index 99.
+00000044  6CE8                      61      bge IS_IT_EMPTY
+00000046  4E75                      62      rts
+00000048                            63     
+00000048                            64      MOVE_VALUES:
+00000048  D3C0                      65          adda.l  d0, a1  
+0000004A  236F 0004 0000            66          move.l  4(SP), GET_TIME_REMAINING(a1)
+00000050  236F 0008 0004            67          move.l  8(SP), GET_FUNCTION_ADDR(a1)
+00000056  236F 000C 0008            68          move.l  12(SP), GET_FUNC_INPUT_1(a1)
+0000005C  236F 0010 000C            69          move.l  16(SP), GET_FUNC_INPUT_2(a1)
+00000062  41F9 000000BC             70          lea CURR_TIMER, a0
+00000068  E888                      71          lsr.l   #4, d0
+0000006A  2080                      72          move.l  d0, (a0)
+0000006C  4E75                      73      rts
+0000006E                            74  
+0000006E                            75  UPDATE_TIMERS:
+0000006E                            76      ;subtract delta time from every timer. 
+Line 77 ERROR: Undefined symbol
+0000006E  41F9 004DBB8E             77      lea     DELTA_TIME, a0
+00000074  2010                      78      move.l  (a0), d0
+00000076  7210                      79      move.l  #TIMER_SIZE, d1
+00000078  41F9 000000C0             80      lea     ALL_TIMERS, a0
+0000007E  1E3C 0096                 81      move.b  #NUM_TIMERS, d7
+00000082                            82      
+00000082                            83      UP_TIM_LOOP:
+00000082  2428 0000                 84      move.l  GET_TIME_REMAINING(a0), d2
+00000086  6F00 002C                 85      ble     INC_LOOP               ;if the timer is 0, then don't bother updating it.
+0000008A  9480                      86      sub.l   d0, d2
+0000008C  2142 0000                 87      move.l  d2, GET_TIME_REMAINING(a0)
+00000090  6E00 0022                 88      bgt     INC_LOOP
+00000094                            89      ;if they hit or go below 0, set the time remaining to 0 and go to FUNC_ADDR with this timer's address in the stack
+00000094                            90      ;(because you're just gonna read GET_FUNC_INPUT_1 and GET_FUNC_INPUT_2 from here).
+00000094                            91      
+00000094  2F07                      92      move.l  d7, -(SP)
+00000096  2F01                      93      move.l  d1, -(SP)
+00000098  2F00                      94      move.l  d0, -(SP)  
+0000009A  2F08                      95      move.l  a0, -(SP)
+0000009C                            96      
+0000009C  2F28 000C                 97      move.l  GET_FUNC_INPUT_2(a0), -(SP)
+000000A0  2F28 0008                 98      move.l  GET_FUNC_INPUT_1(a0), -(SP)
+000000A4  2268 0004                 99      move.l  GET_FUNCTION_ADDR(a0), a1
+000000A8  4E91                     100      jsr     (a1)
+000000AA                           101      
+000000AA  508F                     102      adda.l  #8, SP
+000000AC  205F                     103      move.l  (sp)+, a0
+000000AE  201F                     104      move.l  (sp)+, d0
+000000B0  221F                     105      move.l  (SP)+, d1
+000000B2  2E1F                     106      move.l  (SP)+, d7
+000000B4                           107  
+000000B4                           108  
+000000B4                           109      INC_LOOP:  
+000000B4  D1C1                     110      adda.l   d1, a0
+000000B6  5307                     111      subi.b  #1, d7
+000000B8  6CC8                     112      bge UP_TIM_LOOP
+000000BA  4E75                     113      rts
+000000BC                           114  
+000000BC                           115      
+000000BC= 00000000                 116  CURR_TIMER      dc.l       0       
+000000C0                           117  ALL_TIMERS      ds.l       NUM_TIMERS*TIMER_SIZE
+00002640                           118  
+00002640                           119  
+00002640                           120  
+00002640                           121  
+00002640                           122  
+00002640                           123  
+00002640                           124  
+00002640                           125  
+00002640                           126  
+Line 127 WARNING: END directive missing, starting address not set
+
+1 error detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ALL_TIMERS          C0
+CURR_TIMER          BC
+GET_FUNCTION_ADDR   4
+GET_FUNC_INPUT_1    8
+GET_FUNC_INPUT_2    C
+GET_TIME_REMAINING  0
+INC_LOOP            B4
+IS_IT_EMPTY         2E
+MOVE_VALUES         48
+NOT_INSTANT_TIMER   1E
+NUM_TIMERS          96
+SET_TIMER           0
+TIMER_SIZE          10
+UPDATE_TIMERS       6E
+UP_TIM_LOOP         82
